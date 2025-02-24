@@ -13,7 +13,7 @@ This project extracts text from PDF files using Python. It can handle standard t
 
 ---
 
----
+
 ## Ensure you have the following installed:
 
 ✅Python 3.x
@@ -21,6 +21,7 @@ This project extracts text from PDF files using Python. It can handle standard t
 ✅pdfminer.six (alternative for some PDFs)
 ✅pytesseract & pdf2image (for OCR-based extraction)
 ✅poppler-utils (required for pdf2image)
----
+
 # 🤝Contributing
-✅Feel free to contribute! Open a pull request if you have improvements.
+✅Feel free to contribute!
+Open a pull request if you have improvements.

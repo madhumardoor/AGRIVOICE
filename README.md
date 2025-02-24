@@ -22,6 +22,6 @@ This project extracts text from PDF files using Python. It can handle standard t
 ✅pytesseract & pdf2image (for OCR-based extraction)
 ✅poppler-utils (required for pdf2image)
 
-# 🤝Contributing
+## 🤝Contributing
 ✅Feel free to contribute!
 Open a pull request if you have improvements.

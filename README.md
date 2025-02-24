@@ -17,13 +17,13 @@ This project helps farmers easily understand government schemes, loan subsidies,
 
 
 ## Ensure you have the following installed:
----
-Python 3.x
-pdfplumber (for extracting text from standard PDFs)
-transformers (for text summarization using AI)
-pyttsx3 (for text-to-speech conversion)
-pytesseract & pdf2image (for OCR-based PDF extraction)
----
-## 🤝Contributing
+
+✅Python 3.x
+✅pdfplumber (for extracting text from standard PDFs)
+✅transformers (for text summarization using AI)
+✅pyttsx3 (for text-to-speech conversion)
+✅pytesseract & pdf2image (for OCR-based PDF extraction)
+
+## Contributing
 ✅Feel free to contribute!
 Open a pull request if you have improvements.

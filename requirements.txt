@@ -5,3 +5,4 @@ pdfplumber  # If extracting text from PDFs
 pandas  # If working with tabular data
 speechrecognition  # If voice processing is used
 pyttsx3  # If text-to-speech is used
+nltk

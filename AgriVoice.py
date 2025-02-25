@@ -39,7 +39,7 @@ st.markdown(
     <style>
     .title {
         text-align: center;
-        font-size: 40px;
+        font-size: 50px;
         font-weight: bold;
         white-space: nowrap; /* Prevents text wrapping */
         overflow: hidden;
@@ -52,7 +52,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.markdown("🌏📖 **Upload. Translate. Listen. Break Language Barriers!**")
+st.markdown("📄🔊 **Turn Your Documents into Speech – Instantly!**")
+
+
 
 # ------------------- File Uploader (PDF & DOCX) -------------------
 uploaded_file = st.file_uploader("📂 Upload a Document (PDF or DOCX)", type=["pdf", "docx"])

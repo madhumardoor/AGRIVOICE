@@ -35,7 +35,7 @@ def set_background():
 set_background()
 
 # ------------------- Streamlit UI -------------------
-st.title("📄 AGRIVOICE: PDF Text Extraction & Translation")
+st.title("🌾 AGRIVOICE: PDF Text Extraction & Translation")
 st.markdown("Upload a **PDF file**, extract text, translate it, and convert it to **Kannada speech** 🎙️.")
 
 # File uploader

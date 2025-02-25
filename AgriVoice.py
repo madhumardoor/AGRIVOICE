@@ -7,10 +7,9 @@ import streamlit as st
 import pdfplumber
 import nltk
 import re
-import base64
+import os
 from deep_translator import GoogleTranslator
 from gtts import gTTS
-from io import BytesIO
 from docx import Document
 
 # Download necessary NLTK data
@@ -23,13 +22,28 @@ def set_background():
     page_bg = """
     <style>
     .stApp {
-        background-color: #0047AB; /* Dark Blue */
+        background-color: #004AAD; /* Deep Blue */
+        color: white; /* White Text */
     }
-    h1, h2, h3, h4, h5, h6, p, .stTextInput, .stButton, .stSelectbox, .stMarkdown {
+    h1, h2, h3, h4, h5, h6, p {
         color: white !important;
     }
-    .stDataFrame {
-        background-color: white !important;
+    .stTextArea textarea, .stTextInput input {
+        background-color: #002F6C; /* Darker Blue */
+        color: white;
+        border-radius: 5px;
+    }
+    .stFileUploader {
+        background-color: white;
+        padding: 10px;
+        border-radius: 10px;
+    }
+    .footer {
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+        color: white;
+        padding-top: 20px;
     }
     </style>
     """
@@ -115,23 +129,22 @@ if uploaded_file:
     # ------------------- Convert Kannada Text to Speech -------------------
     if st.button("🎙️ Generate Kannada Audio"):
         tts = gTTS(translated_text_kannada, lang="kn")
-        audio_buffer = BytesIO()
-        tts.save(audio_buffer)
-        audio_buffer.seek(0)
-        st.audio(audio_buffer, format="audio/mp3", start_time=0)
+        
+        # Save as a file instead of memory buffer
+        audio_filename = "kannada_audio.mp3"
+        tts.save(audio_filename)
+
+        # Check if file is generated
+        if os.path.exists(audio_filename):
+            st.success("✅ Audio generated successfully! Click below to listen 🎧")
+            st.audio(audio_filename, format="audio/mp3")
+        else:
+            st.error("❌ Audio generation failed. Please try again.")
 
 # ------------------- Custom Footer -------------------
 st.markdown("---")
 st.markdown(
     """
-    <style>
-    .footer {
-        text-align: center;
-        font-size: 16px;
-        font-weight: bold;
-        color: white;
-    }
-    </style>
     <p class="footer">Developed with ❤️ by <strong>Madhu M</strong> | AGRIVOICE 🌿</p>
     """,
     unsafe_allow_html=True

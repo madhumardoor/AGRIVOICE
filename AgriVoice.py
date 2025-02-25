@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-
-
 @author: Madhu M
 """
 
@@ -35,16 +33,33 @@ def set_background():
 # Call the function to apply background
 set_background()
 
-# ------------------- Streamlit UI -------------------
-st.title("🌾 AGRIVOICE: Bringing Knowledge to Life ")
+# ------------------- Custom Styled Title (Single Line) -------------------
+st.markdown(
+    """
+    <style>
+    .title {
+        text-align: center;
+        font-size: 30px;
+        font-weight: bold;
+        white-space: nowrap; /* Prevents text wrapping */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: white; /* Adjust color based on background */
+    }
+    </style>
+    <p class="title">🌾 AGRIVOICE: Upload, Translate & Listen Instantly! 🌏🔊</p>
+    """,
+    unsafe_allow_html=True
+)
+
 st.markdown("🌏📖 **Upload. Translate. Listen. Break Language Barriers!**")
 
-# File uploader
-uploaded_file = st.file_uploader("Upload a PDF", type=["pdf","docx"])
+# ------------------- File Uploader (PDF & DOCX) -------------------
+uploaded_file = st.file_uploader("📂 Upload a Document (PDF or DOCX)", type=["pdf", "docx"])
 
 if uploaded_file is not None:
     
-    # ------------------- Extract text from PDF -------------------
+    # ------------------- Extract Text from PDF -------------------
     def extract_text_from_pdf(uploaded_file):
         text = ""
         with pdfplumber.open(uploaded_file) as pdf:
@@ -54,13 +69,25 @@ if uploaded_file is not None:
                     text += extracted_text + "\n\n"
         return text
 
-    policy_text = extract_text_from_pdf(uploaded_file)
+    # ------------------- Extract Text from DOCX -------------------
+    def extract_text_from_docx(uploaded_file):
+        doc = Document(uploaded_file)
+        text = "\n".join([para.text for para in doc.paragraphs])
+        return text
+
+    # Check file type and extract text accordingly
+    if uploaded_file.type == "application/pdf":
+        policy_text = extract_text_from_pdf(uploaded_file)
+    elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        policy_text = extract_text_from_docx(uploaded_file)
+    else:
+        policy_text = ""
 
     # Display extracted text
     st.subheader("📜 Extracted Text")
     st.write(policy_text[:500])  # Show first 500 characters
 
-    # ------------------- Clean extracted text -------------------
+    # ------------------- Clean Extracted Text -------------------
     def clean_text(text):
         text = re.sub(r"\s+", " ", text)  # Remove extra spaces
         text = re.sub(r"[^a-zA-Z0-9.,\n\s]", "", text)  # Remove special characters
@@ -70,7 +97,7 @@ if uploaded_file is not None:
 
     cleaned_policy_text = clean_text(policy_text)
 
-    # ------------------- Translate text -------------------
+    # ------------------- Translate Text -------------------
     translated_text_hindi = GoogleTranslator(source="auto", target="hi").translate(cleaned_policy_text)
     translated_text_kannada = GoogleTranslator(source="auto", target="kn").translate(cleaned_policy_text)
 
@@ -81,7 +108,7 @@ if uploaded_file is not None:
     st.subheader("🇮🇳 Translated Text (Kannada)")
     st.write(translated_text_kannada[:500])  # Show first 500 characters
 
-    # ------------------- Convert Kannada text to speech -------------------
+    # ------------------- Convert Kannada Text to Speech -------------------
     if st.button("🎙️ Generate Kannada Audio"):
         tts = gTTS(translated_text_kannada, lang="kn")
         audio_buffer = BytesIO()

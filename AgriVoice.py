@@ -37,7 +37,7 @@ def set_background():
 set_background()
 
 # ------------------- File Uploader (Appears First) -------------------
-st.markdown("## 📂 Upload a Document (PDF or DOCX)")
+st.markdown("## 📂 AGRIVOICE (PDF or DOCX)")
 uploaded_file = st.file_uploader("", type=["pdf", "docx"])
 
 if uploaded_file:

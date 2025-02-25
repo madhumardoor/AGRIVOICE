@@ -25,26 +25,26 @@ def set_background():
     .stApp {
         background: url("https://www.jaagrukbharat.com/_next/image?url=https%3A%2F%2Fjaagruk-public.s3.ap-south-1.amazonaws.com%2Farticle%2Fimages%2Fea1570be-e12d-4d79-bb30-28074d56f917_18KORX2XWfg-oJtHiUzePNur8Kwtiy9Ba.webp&w=3840&q=75");
         background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
     }
     </style>
     """
     st.markdown(page_bg, unsafe_allow_html=True)
 
-# Call the function to apply background
+# Apply background
 set_background()
 
-# ------------------- Custom Styled Title (Single Line) -------------------
+# ------------------- Custom Styled Title -------------------
 st.markdown(
     """
     <style>
     .title {
         text-align: center;
-        font-size: 50px;
+        font-size: 45px;
         font-weight: bold;
-        white-space: nowrap; /* Prevents text wrapping */
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: black; /* Adjust color based on background */
+        color: black;
     }
     </style>
     <p class="title">🌾 AGRIVOICE: Upload, Translate & Listen Instantly! 🌏🔊</p>
@@ -54,9 +54,22 @@ st.markdown(
 
 st.markdown("📄🔊 **Turn Your Documents into Speech – Instantly!**")
 
+# ------------------- Information Section -------------------
+st.subheader("📜 Extracted Text")
+st.write("Text will appear here after uploading...")
 
+st.subheader("🇮🇳 Translated Text (Hindi)")
+st.write("Translation will appear here after uploading...")
 
-# ------------------- File Uploader (PDF & DOCX) -------------------
+st.subheader("🇮🇳 Translated Text (Kannada)")
+st.write("Translation will appear here after uploading...")
+
+# ------------------- Convert Kannada Text to Speech -------------------
+if st.button("🎙️ Generate Kannada Audio"):
+    st.warning("Upload a document first to generate audio!")
+
+# ------------------- File Uploader (Moved to Bottom) -------------------
+st.markdown("---")  # Separator line
 uploaded_file = st.file_uploader("📂 Upload a Document (PDF or DOCX)", type=["pdf", "docx"])
 
 if uploaded_file is not None:
@@ -77,7 +90,7 @@ if uploaded_file is not None:
         text = "\n".join([para.text for para in doc.paragraphs])
         return text
 
-    # Check file type and extract text accordingly
+    # Check file type and extract text
     if uploaded_file.type == "application/pdf":
         policy_text = extract_text_from_pdf(uploaded_file)
     elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
@@ -118,4 +131,19 @@ if uploaded_file is not None:
         audio_buffer.seek(0)
         st.audio(audio_buffer, format="audio/mp3", start_time=0)
 
-st.markdown("🚀 Developed by **Madhu M | AGRIVOICE**")
+# ------------------- Custom Footer -------------------
+st.markdown("---")
+st.markdown(
+    """
+    <style>
+    .footer {
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+        color: black;
+    }
+    </style>
+    <p class="footer">🚀 Developed with ❤️ by <strong>Madhu M</strong> | AGRIVOICE 🌿</p>
+    """,
+    unsafe_allow_html=True
+)

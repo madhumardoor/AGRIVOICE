@@ -11,6 +11,7 @@ import os
 from deep_translator import GoogleTranslator
 from gtts import gTTS
 from docx import Document
+from transformers import pipeline
 
 # Download necessary NLTK data
 nltk.download("stopwords")
@@ -52,12 +53,12 @@ def set_background():
 # Apply background
 set_background()
 
-# ------------------- File Uploader (Appears First) -------------------
+# ------------------- File Uploader -------------------
 st.markdown("## 📂 UPLOAD A DOCUMENT ")
 uploaded_file = st.file_uploader("", type=["pdf", "docx"])
 
 if uploaded_file:
-    st.markdown("---")  # Separator line
+    st.markdown("---")  
 
     # ------------------- Custom Styled Title -------------------
     st.markdown(
@@ -70,7 +71,7 @@ if uploaded_file:
             color: black;
         }
         </style>
-        <p class="title">🌾 AGRIVOICE: Upload, Translate & Listen Instantly! 🌏🔊</p>
+        <p class="title">🌾 AGRIVOICE: Upload, Translate & Summarize Instantly! 🌏🔊</p>
         """,
         unsafe_allow_html=True
     )
@@ -107,10 +108,10 @@ if uploaded_file:
 
     # ------------------- Clean Extracted Text -------------------
     def clean_text(text):
-        text = re.sub(r"\s+", " ", text)  # Remove extra spaces
-        text = re.sub(r"[^a-zA-Z0-9.,\n\s]", "", text)  # Remove special characters
-        text = text.lower()  # Convert to lowercase
-        text = " ".join([word for word in text.split() if word not in stop_words])  # Remove stopwords
+        text = re.sub(r"\s+", " ", text)  
+        text = re.sub(r"[^a-zA-Z0-9.,\n\s]", "", text)  
+        text = text.lower()  
+        text = " ".join([word for word in text.split() if word not in stop_words])  
         return text
 
     cleaned_policy_text = clean_text(policy_text)
@@ -119,19 +120,19 @@ if uploaded_file:
     def split_text(text, max_length=5000):
         chunks = []
         while len(text) > max_length:
-            split_index = text[:max_length].rfind(" ")  # Find the nearest space before 5000 characters
-            if split_index == -1:  # If no space found, split at max_length
+            split_index = text[:max_length].rfind(" ")  
+            if split_index == -1:  
                 split_index = max_length
             chunks.append(text[:split_index])
             text = text[split_index:]
-        chunks.append(text)  # Add remaining text
+        chunks.append(text)  
         return chunks
 
     # ------------------- Function to Translate Large Text -------------------
     def translate_large_text(text, target_lang):
         text_chunks = split_text(text, 5000)
         translated_chunks = [GoogleTranslator(source="auto", target=target_lang).translate(chunk) for chunk in text_chunks]
-        return " ".join(translated_chunks)  # Combine translated parts
+        return " ".join(translated_chunks)  
 
     # ------------------- Translate Text -------------------
     translated_text_hindi = translate_large_text(cleaned_policy_text, "hi")
@@ -143,17 +144,37 @@ if uploaded_file:
     st.subheader("🇮🇳 Translated Text (Kannada)")
     st.write(translated_text_kannada) 
 
-    # ------------------- Convert Kannada Text to Speech -------------------
-    if st.button("🎙️ Generate Kannada Audio"):
-        tts = gTTS(translated_text_kannada, lang="kn")
+    # ------------------- Generate Summary -------------------
+    summarizer = pipeline("summarization")
+
+    def summarize_text(text):
+        text_chunks = split_text(text, 1000)  
+        summarized_chunks = [summarizer(chunk, max_length=150, min_length=50, do_sample=False)[0]["summary_text"] for chunk in text_chunks]
+        return " ".join(summarized_chunks)  
+
+    # Generate summary in English
+    summary_english = summarize_text(cleaned_policy_text)
+
+    # Translate summaries into Hindi and Kannada
+    summary_hindi = GoogleTranslator(source="auto", target="hi").translate(summary_english)
+    summary_kannada = GoogleTranslator(source="auto", target="kn").translate(summary_english)
+
+    # Display Summaries
+    st.subheader("📌 Summary in Hindi 🇮🇳")
+    st.write(summary_hindi)
+    
+    st.subheader("📌 Summary in Kannada 🇮🇳")
+    st.write(summary_kannada)
+
+    # ------------------- Convert Kannada Summary to Speech -------------------
+    if st.button("🎙️ Generate Kannada Summary Audio"):
+        tts = gTTS(summary_kannada, lang="kn")
         
-        # Save as a file instead of memory buffer
-        audio_filename = "kannada_audio.mp3"
+        audio_filename = "kannada_summary_audio.mp3"
         tts.save(audio_filename)
 
-        # Check if file is generated
         if os.path.exists(audio_filename):
-            st.success("✅ Audio generated successfully! Click below to listen 🎧")
+            st.success("✅ Kannada Summary Audio Generated Successfully! 🎧")
             st.audio(audio_filename, format="audio/mp3")
         else:
             st.error("❌ Audio generation failed. Please try again.")

@@ -24,7 +24,7 @@ def set_background():
     page_bg = """
     <style>
     .stApp {
-        background: url(https://media.istockphoto.com/id/1365693895/photo/closeup-shot-of-an-unrecognisable-man-and-woman-shaking-hands-on-a-farm.jpg?s=612x612&w=0&k=20&c=XYtVXoRxDUC2DkeKhn9S7LHOLV5Dvbqf09DTkrSjdOg=) no-repeat center center fixed;
+        background: url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSge6E5SOQmGoZJzSiTr5-c2Go43RRvRJPV-w&s
         background-size: cover;
     }
     </style>

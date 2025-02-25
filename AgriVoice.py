@@ -44,7 +44,7 @@ st.markdown(
         white-space: nowrap; /* Prevents text wrapping */
         overflow: hidden;
         text-overflow: ellipsis;
-        color: white; /* Adjust color based on background */
+        color: transparent; /* Adjust color based on background */
     }
     </style>
     <p class="title">🌾 AGRIVOICE: Upload, Translate & Listen Instantly! 🌏🔊</p>

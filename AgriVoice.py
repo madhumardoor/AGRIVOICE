@@ -13,6 +13,7 @@ import base64
 from deep_translator import GoogleTranslator
 from gtts import gTTS
 from io import BytesIO
+from docx import Document
 
 # Download necessary NLTK data
 nltk.download("stopwords")
@@ -35,11 +36,11 @@ def set_background():
 set_background()
 
 # ------------------- Streamlit UI -------------------
-st.title("🌾 AGRIVOICE: PDF Text Extraction & Translation")
-st.markdown("🌱 **Bringing Knowledge to Life – Translate & Listen to Your Documents in Kannada! 🎙️**")
+st.title("🌾 AGRIVOICE: Bringing Knowledge to Life ")
+st.markdown("🌏📖 **Upload. Translate. Listen. Break Language Barriers!**")
 
 # File uploader
-uploaded_file = st.file_uploader("Upload a PDF", type=["pdf"])
+uploaded_file = st.file_uploader("Upload a PDF", type=["pdf","docx"])
 
 if uploaded_file is not None:
     

@@ -67,7 +67,7 @@ if uploaded_file:
             text-align: center;
             font-size: 45px;
             font-weight: bold;
-            color: white;
+            color: black;
         }
         </style>
         <p class="title">🌾 AGRIVOICE: Upload, Translate & Listen Instantly! 🌏🔊</p>

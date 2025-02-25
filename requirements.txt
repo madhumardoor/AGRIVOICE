@@ -9,3 +9,4 @@ nltk
 deep_translator
 gtts
 python-docx
+transformers

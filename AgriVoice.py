@@ -23,7 +23,7 @@ def set_background():
     page_bg = """
     <style>
     .stApp {
-        background: url("https://www.jaagrukbharat.com/_next/image?url=https%3A%2F%2Fjaagruk-public.s3.ap-south-1.amazonaws.com%2Farticle%2Fimages%2Fea1570be-e12d-4d79-bb30-28074d56f917_18KORX2XWfg-oJtHiUzePNur8Kwtiy9Ba.webp&w=3840&q=75")
+        background-color: black;
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -37,7 +37,7 @@ def set_background():
 set_background()
 
 # ------------------- File Uploader (Appears First) -------------------
-st.markdown("## 📂 AGRIVOICE (PDF or DOCX)")
+st.markdown("## 📂 UPLOAD A DOCUMENT ")
 uploaded_file = st.file_uploader("", type=["pdf", "docx"])
 
 if uploaded_file:
@@ -51,7 +51,7 @@ if uploaded_file:
             text-align: center;
             font-size: 45px;
             font-weight: bold;
-            color: black;
+            color: white;
         }
         </style>
         <p class="title">🌾 AGRIVOICE: Upload, Translate & Listen Instantly! 🌏🔊</p>
@@ -127,10 +127,10 @@ st.markdown(
         text-align: center;
         font-size: 16px;
         font-weight: bold;
-        color: black;
+        color: white;
     }
     </style>
-    <p class="footer">🚀 Developed with ❤️ by <strong>Madhu M</strong> | AGRIVOICE 🌿</p>
+    <p class="footer">Developed with ❤️ by <strong>Madhu M</strong> | AGRIVOICE 🌿</p>
     """,
     unsafe_allow_html=True
 )

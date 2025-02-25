@@ -1,6 +1,4 @@
 
-@author: Madhu M
-
 import streamlit as st
 import pdfplumber
 import nltk

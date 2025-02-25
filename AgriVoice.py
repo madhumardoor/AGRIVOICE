@@ -121,10 +121,9 @@ if uploaded_file:
 
     # Display translations
     st.subheader("🇮🇳 Translated Text (Hindi)")
-    st.write(translated_text_hindi[:500])  # Show first 500 characters
-
+    st.write(translated_text_hindi)  
     st.subheader("🇮🇳 Translated Text (Kannada)")
-    st.write(translated_text_kannada[:500])  # Show first 500 characters
+    st.write(translated_text_kannada) 
 
     # ------------------- Convert Kannada Text to Speech -------------------
     if st.button("🎙️ Generate Kannada Audio"):

@@ -1,0 +1,7 @@
+streamlit
+pymupdf  # For reading PDFs
+pypdf  # Alternative for PDF manipulation
+pdfplumber  # If extracting text from PDFs
+pandas  # If working with tabular data
+speechrecognition  # If voice processing is used
+pyttsx3  # If text-to-speech is used

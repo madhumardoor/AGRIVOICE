@@ -1,29 +1,49 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Feb 25 23:45:24 2025
 
-@author: PC
+
+@author: Madhu M
 """
 
 import streamlit as st
 import pdfplumber
 import nltk
 import re
+import base64
 from deep_translator import GoogleTranslator
 from gtts import gTTS
+from io import BytesIO
 
 # Download necessary NLTK data
 nltk.download("stopwords")
 nltk.download("punkt")
 stop_words = set(nltk.corpus.stopwords.words("english"))
 
+# ------------------- Function to Set Background Image -------------------
+def set_background():
+    page_bg = """
+    <style>
+    .stApp {
+        background: url(https://media.istockphoto.com/id/1365693895/photo/closeup-shot-of-an-unrecognisable-man-and-woman-shaking-hands-on-a-farm.jpg?s=612x612&w=0&k=20&c=XYtVXoRxDUC2DkeKhn9S7LHOLV5Dvbqf09DTkrSjdOg=) no-repeat center center fixed;
+        background-size: cover;
+    }
+    </style>
+    """
+    st.markdown(page_bg, unsafe_allow_html=True)
+
+# Call the function to apply background
+set_background()
+
+# ------------------- Streamlit UI -------------------
 st.title("📄 AGRIVOICE: PDF Text Extraction & Translation")
+st.markdown("Upload a **PDF file**, extract text, translate it, and convert it to **Kannada speech** 🎙️.")
 
 # File uploader
 uploaded_file = st.file_uploader("Upload a PDF", type=["pdf"])
 
 if uploaded_file is not None:
-    # Extract text from PDF
+    
+    # ------------------- Extract text from PDF -------------------
     def extract_text_from_pdf(uploaded_file):
         text = ""
         with pdfplumber.open(uploaded_file) as pdf:
@@ -36,36 +56,36 @@ if uploaded_file is not None:
     policy_text = extract_text_from_pdf(uploaded_file)
 
     # Display extracted text
-    st.subheader("Extracted Text")
+    st.subheader("📜 Extracted Text")
     st.write(policy_text[:500])  # Show first 500 characters
 
-    # Clean text
+    # ------------------- Clean extracted text -------------------
     def clean_text(text):
-        text = re.sub(r"\s+", " ", text)
-        text = re.sub(r"[^a-zA-Z0-9.,\n\s]", "", text)
-        text = text.lower()
-        text = " ".join([word for word in text.split() if word not in stop_words])
+        text = re.sub(r"\s+", " ", text)  # Remove extra spaces
+        text = re.sub(r"[^a-zA-Z0-9.,\n\s]", "", text)  # Remove special characters
+        text = text.lower()  # Convert to lowercase
+        text = " ".join([word for word in text.split() if word not in stop_words])  # Remove stopwords
         return text
 
     cleaned_policy_text = clean_text(policy_text)
 
-    # Translate to Hindi
+    # ------------------- Translate text -------------------
     translated_text_hindi = GoogleTranslator(source="auto", target="hi").translate(cleaned_policy_text)
-    
-    # Translate to Kannada
     translated_text_kannada = GoogleTranslator(source="auto", target="kn").translate(cleaned_policy_text)
 
     # Display translations
-    st.subheader("Translated Text (Hindi)")
+    st.subheader("🇮🇳 Translated Text (Hindi)")
     st.write(translated_text_hindi[:500])  # Show first 500 characters
 
-    st.subheader("Translated Text (Kannada)")
+    st.subheader("🇮🇳 Translated Text (Kannada)")
     st.write(translated_text_kannada[:500])  # Show first 500 characters
 
-    # Convert text to speech in Kannada
-    if st.button("Generate Kannada Audio 🎙️"):
+    # ------------------- Convert Kannada text to speech -------------------
+    if st.button("🎙️ Generate Kannada Audio"):
         tts = gTTS(translated_text_kannada, lang="kn")
-        tts.save("Kannada_Speech.mp3")
-        st.audio("Kannada_Speech.mp3")
+        audio_buffer = BytesIO()
+        tts.save(audio_buffer)
+        audio_buffer.seek(0)
+        st.audio(audio_buffer, format="audio/mp3", start_time=0)
 
-st.markdown("🚀 Developed by Madhu M | AGRIVOICE")
+st.markdown("🚀 Developed by **Madhu M | AGRIVOICE**")

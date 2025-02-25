@@ -12,3 +12,4 @@ python-docx
 transformers
 TensorFlow 2.0 
 PyTorch
+pip install --upgrade pip

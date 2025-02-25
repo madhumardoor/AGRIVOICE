@@ -115,9 +115,27 @@ if uploaded_file:
 
     cleaned_policy_text = clean_text(policy_text)
 
+    # ------------------- Function to Split Large Text for Translation -------------------
+    def split_text(text, max_length=5000):
+        chunks = []
+        while len(text) > max_length:
+            split_index = text[:max_length].rfind(" ")  # Find the nearest space before 5000 characters
+            if split_index == -1:  # If no space found, split at max_length
+                split_index = max_length
+            chunks.append(text[:split_index])
+            text = text[split_index:]
+        chunks.append(text)  # Add remaining text
+        return chunks
+
+    # ------------------- Function to Translate Large Text -------------------
+    def translate_large_text(text, target_lang):
+        text_chunks = split_text(text, 5000)
+        translated_chunks = [GoogleTranslator(source="auto", target=target_lang).translate(chunk) for chunk in text_chunks]
+        return " ".join(translated_chunks)  # Combine translated parts
+
     # ------------------- Translate Text -------------------
-    translated_text_hindi = GoogleTranslator(source="auto", target="hi").translate(cleaned_policy_text)
-    translated_text_kannada = GoogleTranslator(source="auto", target="kn").translate(cleaned_policy_text)
+    translated_text_hindi = translate_large_text(cleaned_policy_text, "hi")
+    translated_text_kannada = translate_large_text(cleaned_policy_text, "kn")
 
     # Display translations
     st.subheader("🇮🇳 Translated Text (Hindi)")

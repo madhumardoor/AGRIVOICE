@@ -8,3 +8,4 @@ pyttsx3  # If text-to-speech is used
 nltk
 deep_translator
 gtts
+python-docx

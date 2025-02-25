@@ -18,16 +18,18 @@ nltk.download("stopwords")
 nltk.download("punkt")
 stop_words = set(nltk.corpus.stopwords.words("english"))
 
-# ------------------- Function to Set Background Image -------------------
+# ------------------- Function to Set Background Color -------------------
 def set_background():
     page_bg = """
     <style>
     .stApp {
-        background-color: black;
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
+        background-color: #0047AB; /* Dark Blue */
+    }
+    h1, h2, h3, h4, h5, h6, p, .stTextInput, .stButton, .stSelectbox, .stMarkdown {
+        color: white !important;
+    }
+    .stDataFrame {
+        background-color: white !important;
     }
     </style>
     """

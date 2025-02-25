@@ -134,50 +134,59 @@ if uploaded_file:
         translated_chunks = [GoogleTranslator(source="auto", target=target_lang).translate(chunk) for chunk in text_chunks]
         return " ".join(translated_chunks)  
 
-    # ------------------- Translate Text -------------------
-    translated_text_hindi = translate_large_text(cleaned_policy_text, "hi")
-    translated_text_kannada = translate_large_text(cleaned_policy_text, "kn")
+    # ------------------- Language Selection -------------------
+    st.subheader("🌍 Choose Translation Language")
+    translation_option = st.radio(
+        "Select the language for translation:",
+        ("No Translation", "Hindi", "Kannada"),
+        index=0
+    )
 
-    # Display translations
-    st.subheader("🇮🇳 Translated Text (Hindi)")
-    st.write(translated_text_hindi)  
-    st.subheader("🇮🇳 Translated Text (Kannada)")
-    st.write(translated_text_kannada) 
+    translated_text_hindi, translated_text_kannada = "", ""
 
-    # ------------------- Generate Summary -------------------
-    summarizer = pipeline("summarization")
+    if translation_option == "Hindi":
+        translated_text_hindi = translate_large_text(cleaned_policy_text, "hi")
+        st.subheader("🇮🇳 Translated Text (Hindi)")
+        st.write(translated_text_hindi)
 
-    def summarize_text(text):
-        text_chunks = split_text(text, 1000)  
-        summarized_chunks = [summarizer(chunk, max_length=150, min_length=50, do_sample=False)[0]["summary_text"] for chunk in text_chunks]
-        return " ".join(summarized_chunks)  
+    elif translation_option == "Kannada":
+        translated_text_kannada = translate_large_text(cleaned_policy_text, "kn")
+        st.subheader("🇮🇳 Translated Text (Kannada)")
+        st.write(translated_text_kannada)
 
-    # Generate summary in English
-    summary_english = summarize_text(cleaned_policy_text)
+    # ------------------- Generate Summary Based on Language Selection -------------------
+    if translation_option != "No Translation":
+        summarizer = pipeline("summarization")
 
-    # Translate summaries into Hindi and Kannada
-    summary_hindi = GoogleTranslator(source="auto", target="hi").translate(summary_english)
-    summary_kannada = GoogleTranslator(source="auto", target="kn").translate(summary_english)
+        def summarize_text(text):
+            text_chunks = split_text(text, 1000)  
+            summarized_chunks = [summarizer(chunk, max_length=150, min_length=50, do_sample=False)[0]["summary_text"] for chunk in text_chunks]
+            return " ".join(summarized_chunks)  
 
-    # Display Summaries
-    st.subheader("📌 Summary in Hindi 🇮🇳")
-    st.write(summary_hindi)
-    
-    st.subheader("📌 Summary in Kannada 🇮🇳")
-    st.write(summary_kannada)
+        summary_english = summarize_text(cleaned_policy_text)
 
-    # ------------------- Convert Kannada Summary to Speech -------------------
-    if st.button("🎙️ Generate Kannada Summary Audio"):
-        tts = gTTS(summary_kannada, lang="kn")
-        
-        audio_filename = "kannada_summary_audio.mp3"
-        tts.save(audio_filename)
+        if translation_option == "Hindi":
+            summary_hindi = GoogleTranslator(source="auto", target="hi").translate(summary_english)
+            st.subheader("📌 Summary in Hindi 🇮🇳")
+            st.write(summary_hindi)
 
-        if os.path.exists(audio_filename):
-            st.success("✅ Kannada Summary Audio Generated Successfully! 🎧")
-            st.audio(audio_filename, format="audio/mp3")
-        else:
-            st.error("❌ Audio generation failed. Please try again.")
+        elif translation_option == "Kannada":
+            summary_kannada = GoogleTranslator(source="auto", target="kn").translate(summary_english)
+            st.subheader("📌 Summary in Kannada 🇮🇳")
+            st.write(summary_kannada)
+
+        # ------------------- Convert Summary to Speech (For Kannada) -------------------
+        if translation_option == "Kannada" and st.button("🎙️ Generate Kannada Summary Audio"):
+            tts = gTTS(summary_kannada, lang="kn")
+            
+            audio_filename = "kannada_summary_audio.mp3"
+            tts.save(audio_filename)
+
+            if os.path.exists(audio_filename):
+                st.success("✅ Kannada Summary Audio Generated Successfully! 🎧")
+                st.audio(audio_filename, format="audio/mp3")
+            else:
+                st.error("❌ Audio generation failed. Please try again.")
 
 # ------------------- Custom Footer -------------------
 st.markdown("---")

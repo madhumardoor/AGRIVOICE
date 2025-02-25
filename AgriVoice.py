@@ -39,12 +39,12 @@ st.markdown(
     <style>
     .title {
         text-align: center;
-        font-size: 30px;
+        font-size: 40px;
         font-weight: bold;
         white-space: nowrap; /* Prevents text wrapping */
         overflow: hidden;
         text-overflow: ellipsis;
-        color: green; /* Adjust color based on background */
+        color: black; /* Adjust color based on background */
     }
     </style>
     <p class="title">🌾 AGRIVOICE: Upload, Translate & Listen Instantly! 🌏🔊</p>

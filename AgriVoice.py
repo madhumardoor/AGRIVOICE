@@ -36,7 +36,7 @@ set_background()
 
 # ------------------- Streamlit UI -------------------
 st.title("🌾 AGRIVOICE: PDF Text Extraction & Translation")
-st.markdown("Upload a **PDF file**, extract text, translate it, and convert it to **Kannada speech** 🎙️.")
+st.markdown("🌱 **Bringing Knowledge to Life – Translate & Listen to Your Documents in Kannada! 🎙️**")
 
 # File uploader
 uploaded_file = st.file_uploader("Upload a PDF", type=["pdf"])

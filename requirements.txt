@@ -10,3 +10,5 @@ deep_translator
 gtts
 python-docx
 transformers
+TensorFlow 2.0 
+PyTorch

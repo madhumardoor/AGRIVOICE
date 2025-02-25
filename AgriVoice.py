@@ -36,44 +36,31 @@ def set_background():
 # Apply background
 set_background()
 
-# ------------------- Custom Styled Title -------------------
-st.markdown(
-    """
-    <style>
-    .title {
-        text-align: center;
-        font-size: 45px;
-        font-weight: bold;
-        color: black;
-    }
-    </style>
-    <p class="title">🌾 AGRIVOICE: Upload, Translate & Listen Instantly! 🌏🔊</p>
-    """,
-    unsafe_allow_html=True
-)
+# ------------------- File Uploader (Appears First) -------------------
+st.markdown("## 📂 Upload a Document (PDF or DOCX)")
+uploaded_file = st.file_uploader("", type=["pdf", "docx"])
 
-st.markdown("📄🔊 **Turn Your Documents into Speech – Instantly!**")
+if uploaded_file:
+    st.markdown("---")  # Separator line
 
-# ------------------- Information Section -------------------
-st.subheader("📜 Extracted Text")
-st.write("Text will appear here after uploading...")
+    # ------------------- Custom Styled Title -------------------
+    st.markdown(
+        """
+        <style>
+        .title {
+            text-align: center;
+            font-size: 45px;
+            font-weight: bold;
+            color: black;
+        }
+        </style>
+        <p class="title">🌾 AGRIVOICE: Upload, Translate & Listen Instantly! 🌏🔊</p>
+        """,
+        unsafe_allow_html=True
+    )
 
-st.subheader("🇮🇳 Translated Text (Hindi)")
-st.write("Translation will appear here after uploading...")
+    st.markdown("📄🔊 **Turn Your Documents into Speech – Instantly!**")
 
-st.subheader("🇮🇳 Translated Text (Kannada)")
-st.write("Translation will appear here after uploading...")
-
-# ------------------- Convert Kannada Text to Speech -------------------
-if st.button("🎙️ Generate Kannada Audio"):
-    st.warning("Upload a document first to generate audio!")
-
-# ------------------- File Uploader (Moved to Bottom) -------------------
-st.markdown("---")  # Separator line
-uploaded_file = st.file_uploader("📂 Upload a Document (PDF or DOCX)", type=["pdf", "docx"])
-
-if uploaded_file is not None:
-    
     # ------------------- Extract Text from PDF -------------------
     def extract_text_from_pdf(uploaded_file):
         text = ""

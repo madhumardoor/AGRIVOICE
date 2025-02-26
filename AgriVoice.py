@@ -1,196 +1,87 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Madhu M
-"""
-
 import streamlit as st
 import pdfplumber
-import nltk
-import re
 import os
-from deep_translator import GoogleTranslator
-from gtts import gTTS
 from docx import Document
 from transformers import pipeline
+from deep_translator import GoogleTranslator
+from gtts import gTTS
 
-# Download necessary NLTK data
-nltk.download("stopwords")
-nltk.download("punkt")
-stop_words = set(nltk.corpus.stopwords.words("english"))
+# ------------------- Streamlit UI -------------------
+st.title("📄 AGRIVOICE: Translate & Summarize Documents")
+st.write("Upload a **PDF** or **DOCX** file to extract text, summarize, translate, and generate speech.")
 
-# ------------------- Function to Set Background Color -------------------
-def set_background():
-    page_bg = """
-    <style>
-    .stApp {
-        background-color: #004AAD; /* Deep Blue */
-        color: white; /* White Text */
-    }
-    h1, h2, h3, h4, h5, h6, p {
-        color: white !important;
-    }
-    .stTextArea textarea, .stTextInput input {
-        background-color: #002F6C; /* Darker Blue */
-        color: white;
-        border-radius: 5px;
-    }
-    .stFileUploader {
-        background-color: white;
-        padding: 10px;
-        border-radius: 10px;
-    }
-    .footer {
-        text-align: center;
-        font-size: 16px;
-        font-weight: bold;
-        color: white;
-        padding-top: 20px;
-    }
-    </style>
-    """
-    st.markdown(page_bg, unsafe_allow_html=True)
+uploaded_file = st.file_uploader("📂 Upload File", type=["pdf", "docx"])
 
-# Apply background
-set_background()
+# ------------------- Extract Text from PDF -------------------
+def extract_text_from_pdf(uploaded_file):
+    text = ""
+    try:
+        with pdfplumber.open(uploaded_file) as pdf:
+            for page in pdf.pages:
+                extracted_text = page.extract_text()
+                if extracted_text:
+                    text += extracted_text + "\n\n"
+    except Exception as e:
+        st.error(f"❌ Error reading PDF: {e}")
+    return text
 
-# ------------------- File Uploader -------------------
-st.markdown("## 📂 UPLOAD A DOCUMENT ")
-uploaded_file = st.file_uploader("", type=["pdf", "docx"])
+# ------------------- Extract Text from DOCX -------------------
+def extract_text_from_docx(uploaded_file):
+    text = ""
+    try:
+        doc = Document(uploaded_file)
+        text = "\n".join([para.text for para in doc.paragraphs])
+    except Exception as e:
+        st.error(f"❌ Error reading DOCX: {e}")
+    return text
 
+# ------------------- Summarization -------------------
+summarizer = pipeline("summarization")
+
+def summarize_text(text):
+    try:
+        return summarizer(text, max_length=150, min_length=50, do_sample=False)[0]["summary_text"]
+    except Exception as e:
+        st.error(f"❌ Error summarizing text: {e}")
+        return ""
+
+# ------------------- Main Logic -------------------
 if uploaded_file:
-    st.markdown("---")  
+    st.success("✅ File Uploaded Successfully!")
 
-    # ------------------- Custom Styled Title -------------------
-    st.markdown(
-        """
-        <style>
-        .title {
-            text-align: center;
-            font-size: 45px;
-            font-weight: bold;
-            color: black;
-        }
-        </style>
-        <p class="title">🌾 AGRIVOICE: Upload, Translate & Summarize Instantly! 🌏🔊</p>
-        """,
-        unsafe_allow_html=True
-    )
-
-    st.markdown("📄🔊 **Turn Your Documents into Speech – Instantly!**")
-
-    # ------------------- Extract Text from PDF -------------------
-    def extract_text_from_pdf(uploaded_file):
-        text = ""
-        try:
-            with pdfplumber.open(uploaded_file) as pdf:
-                for page in pdf.pages:
-                    extracted_text = page.extract_text()
-                    if extracted_text:
-                        text += extracted_text + "\n\n"
-        except Exception as e:
-            st.error(f"Error reading PDF: {e}")
-        return text
-
-    # ------------------- Extract Text from DOCX -------------------
-    def extract_text_from_docx(uploaded_file):
-        text = ""
-        try:
-            doc = Document(uploaded_file)
-            text = "\n".join([para.text for para in doc.paragraphs])
-        except Exception as e:
-            st.error(f"Error reading DOCX: {e}")
-        return text
-
-    # Check file type and extract text
+    # Extract text based on file type
     if uploaded_file.type == "application/pdf":
         policy_text = extract_text_from_pdf(uploaded_file)
     elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
         policy_text = extract_text_from_docx(uploaded_file)
     else:
+        st.error("❌ Unsupported file type!")
         policy_text = ""
 
     # Display extracted text
-    st.subheader("📜 Extracted Text")
-    st.write(policy_text[:500])  # Show first 500 characters
+    if policy_text:
+        st.subheader("📜 Extracted Text")
+        st.text_area("📝 Text Preview", policy_text[:500], height=200)
 
-    # ------------------- Clean Extracted Text -------------------
-    def clean_text(text):
-        text = re.sub(r"\s+", " ", text)  
-        text = re.sub(r"[^a-zA-Z0-9.,\n\s]", "", text)  
-        text = text.lower()  
-        text = " ".join([word for word in text.split() if word not in stop_words])  
-        return text
+        # ------------------- Summarization -------------------
+        summary_english = summarize_text(policy_text)
+        st.subheader("📌 Summary")
+        st.write(summary_english)
 
-    cleaned_policy_text = clean_text(policy_text)
+        # ------------------- Translation -------------------
+        translation_option = st.radio("🌍 Translate to:", ("No Translation", "Hindi", "Kannada"), index=0)
 
-    # ------------------- Function to Split Large Text for Translation -------------------
-    def split_text(text, max_length=5000):
-        chunks = []
-        while len(text) > max_length:
-            split_index = text[:max_length].rfind(" ")  
-            if split_index == -1:  
-                split_index = max_length
-            chunks.append(text[:split_index])
-            text = text[split_index:]
-        chunks.append(text)  
-        return chunks
+        if translation_option != "No Translation":
+            target_lang = "hi" if translation_option == "Hindi" else "kn"
+            translated_summary = GoogleTranslator(source="auto", target=target_lang).translate(summary_english)
+            st.subheader(f"📖 Summary in {translation_option}")
+            st.write(translated_summary)
 
-    # ------------------- Function to Translate Large Text -------------------
-    def translate_large_text(text, target_lang):
-        text_chunks = split_text(text, 5000)
-        translated_chunks = [GoogleTranslator(source="auto", target=target_lang).translate(chunk) for chunk in text_chunks]
-        return " ".join(translated_chunks)  
-
-    # ------------------- Language Selection -------------------
-    st.subheader("🌍 Choose Translation Language")
-    translation_option = st.radio(
-        "Select the language for translation:",
-        ("No Translation", "Hindi", "Kannada"),
-        index=0
-    )
-
-    translated_text = ""
-    if translation_option == "Hindi":
-        translated_text = translate_large_text(cleaned_policy_text, "hi")
-        st.subheader("🇮🇳 Translated Text (Hindi)")
-        st.write(translated_text)
-    elif translation_option == "Kannada":
-        translated_text = translate_large_text(cleaned_policy_text, "kn")
-        st.subheader("🇮🇳 Translated Text (Kannada)")
-        st.write(translated_text)
-
-    # ------------------- Generate Summary -------------------
-    summarizer = pipeline("summarization")
-
-    def summarize_text(text):
-        text_chunks = split_text(text, 1000)
-        summarized_chunks = [summarizer(chunk, max_length=150, min_length=50, do_sample=False)[0]["summary_text"] for chunk in text_chunks]
-        return " ".join(summarized_chunks)
-
-    summary_english = summarize_text(cleaned_policy_text)
-
-    if translation_option != "No Translation":
-        summary_translated = GoogleTranslator(source="auto", target="hi" if translation_option == "Hindi" else "kn").translate(summary_english)
-        st.subheader(f"📌 Summary in {translation_option} 🇮🇳")
-        st.write(summary_translated)
-
-        # ------------------- Convert Summary to Speech -------------------
-        if st.button(f"🎙️ Generate {translation_option} Summary Audio"):
-            tts = gTTS(summary_translated, lang="hi" if translation_option == "Hindi" else "kn")
-            audio_filename = "summary_audio.mp3"
-            tts.save(audio_filename)
-
-            if os.path.exists(audio_filename):
-                st.success(f"✅ {translation_option} Summary Audio Generated Successfully! 🎧")
+            # ------------------- Convert to Speech -------------------
+            if st.button(f"🎙️ Generate {translation_option} Audio"):
+                tts = gTTS(translated_summary, lang=target_lang)
+                audio_filename = "summary_audio.mp3"
+                tts.save(audio_filename)
+                st.success("✅ Audio Generated Successfully!")
                 st.audio(audio_filename, format="audio/mp3")
-            else:
-                st.error("❌ Audio generation failed. Please try again.")
 
-# ------------------- Custom Footer -------------------
-st.markdown("---")
-st.markdown(
-    """
-    <p class="footer">Developed with ❤️ by <strong>Madhu M</strong> | AGRIVOICE 🌿</p>
-    """,
-    unsafe_allow_html=True
-)

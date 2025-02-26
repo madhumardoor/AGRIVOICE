@@ -6,3 +6,4 @@ gtts
 python-docx
 transformers
 torch
+PyPDF2

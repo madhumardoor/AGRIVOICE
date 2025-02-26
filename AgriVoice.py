@@ -102,7 +102,7 @@ if uploaded_file:
 
     # Display extracted text
     st.subheader("📜 Extracted Text")
-    st.write(policy_text[:500])  # Show first 500 characters
+    st.write(policy_text[5000])  # Show first 5000 characters
 
     # ------------------- Clean Extracted Text -------------------
     def clean_text(text):
@@ -115,7 +115,7 @@ if uploaded_file:
     cleaned_policy_text = clean_text(policy_text)
 
     # ------------------- Function to Split Large Text -------------------
-    def split_text(text, max_length=5000):
+    def split_text(text, max_length):
         chunks = []
         while len(text) > max_length:
             split_index = text[:max_length].rfind(" ")  
@@ -128,7 +128,7 @@ if uploaded_file:
 
     # ------------------- Translate Large Text -------------------
     def translate_large_text(text, target_lang):
-        text_chunks = split_text(text, 5000)
+        text_chunks = split_text(text)
         translated_chunks = [GoogleTranslator(source="auto", target=target_lang).translate(chunk) for chunk in text_chunks]
         return " ".join(translated_chunks)  
 
@@ -146,7 +146,7 @@ if uploaded_file:
     summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
 
     def summarize_text(text):
-        text_chunks = split_text(text, 1000)
+        text_chunks = split_text(text)
         summarized_chunks = [summarizer(chunk, max_length=150, min_length=50, do_sample=False)[0]["summary_text"] for chunk in text_chunks]
         return " ".join(summarized_chunks)  
 

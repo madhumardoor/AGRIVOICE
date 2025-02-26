@@ -9,3 +9,4 @@ torch
 PyPDF2
 googletrans
 Translator
+pyttsx3

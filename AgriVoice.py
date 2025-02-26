@@ -104,7 +104,7 @@ if uploaded_file:
 
     # Display extracted text
     st.subheader("📜 Extracted Text")
-    st.write(policy_text[:500])  # Show first 500 characters
+    st.write(policy_text[])  
 
     # ------------------- Clean Extracted Text -------------------
     def clean_text(text):

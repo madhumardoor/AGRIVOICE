@@ -1,64 +1,89 @@
 import streamlit as st
-import PyPDF2
-import docx
-from googletrans import Translator
-import pyttsx3
+import pdfplumber
+import os
+from docx import Document
+from transformers import pipeline
+from deep_translator import GoogleTranslator
+from gtts import gTTS
 
-# Initialize translator and TTS engine
-translator = Translator()
-tts = pyttsx3.init()
+# ------------------- Streamlit UI -------------------
+st.title("📄 AGRIVOICE: Translate & Summarize Documents")
+st.write("Upload a **PDF** or **DOCX** file to extract text, summarize, translate, and generate speech.")
 
-def extract_text_from_pdf(file):
-    reader = PyPDF2.PdfReader(file)
-    text = "\n".join([page.extract_text() for page in reader.pages if page.extract_text()])
+uploaded_file = st.file_uploader("📂 Upload File", type=["pdf", "docx"])
+
+# ------------------- Extract Text from PDF -------------------
+def extract_text_from_pdf(uploaded_file):
+    text = ""
+    try:
+        with pdfplumber.open(uploaded_file) as pdf:
+            for page in pdf.pages:
+                extracted_text = page.extract_text()
+                if extracted_text:
+                    text += extracted_text + "\n\n"
+    except Exception as e:
+        st.error(f"❌ Error reading PDF: {e}")
     return text
 
-def extract_text_from_docx(file):
-    doc = docx.Document(file)
-    text = "\n".join([para.text for para in doc.paragraphs])
+# ------------------- Extract Text from DOCX -------------------
+def extract_text_from_docx(uploaded_file):
+    text = ""
+    try:
+        doc = Document(uploaded_file)
+        text = "\n".join([para.text for para in doc.paragraphs])
+    except Exception as e:
+        st.error(f"❌ Error reading DOCX: {e}")
     return text
 
-def translate_text(text, target_lang):
-    return translator.translate(text, dest=target_lang).text
+# ------------------- Summarization -------------------
+try:
+    summarizer = pipeline("summarization")
+except Exception as e:
+    st.error(f"❌ Error loading summarization model: {e}")
 
-def text_to_speech(text, language):
-    tts.setProperty('rate', 150)
-    tts.setProperty('voice', language)
-    tts.say(text)
-    tts.runAndWait()
+def summarize_text(text):
+    try:
+        return summarizer(text, max_length=150, min_length=50, do_sample=False)[0]["summary_text"]
+    except Exception as e:
+        st.error(f"❌ Error summarizing text: {e}")
+        return ""
 
-# Streamlit UI
-st.title("📄 File Extraction, Translation & TTS App")
-st.subheader("Developed by Madhu M | AGRIVOICE 🌿")
-
-uploaded_file = st.file_uploader("Upload a PDF or DOCX file", type=["pdf", "docx"], key="file_uploader")
-
+# ------------------- Main Logic -------------------
 if uploaded_file:
-    file_type = uploaded_file.type
-    st.success(f"Uploaded: {uploaded_file.name}")
-    
-    if file_type == "application/pdf":
-        extracted_text = extract_text_from_pdf(uploaded_file)
-    elif file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-        extracted_text = extract_text_from_docx(uploaded_file)
+    st.success("✅ File Uploaded Successfully!")
+
+    # Extract text based on file type
+    if uploaded_file.type == "application/pdf":
+        policy_text = extract_text_from_pdf(uploaded_file)
+    elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        policy_text = extract_text_from_docx(uploaded_file)
     else:
-        extracted_text = ""
-    
-    if extracted_text:
-        st.subheader("Extracted Text:")
-        st.text_area("", extracted_text, height=200)
-        
-        # Translation Options
-        target_lang = st.selectbox("Translate to:", ["hi", "kn"], format_func=lambda x: "Hindi" if x == "hi" else "Kannada")
-        
-        if st.button("Translate"):
-            translated_text = translate_text(extracted_text, target_lang)
-            st.subheader("Translated Text:")
-            st.text_area("", translated_text, height=200)
-            
-            if st.button("Play Audio"):
-                lang_voice = 'hi' if target_lang == "hi" else 'kn'
-                text_to_speech(translated_text, lang_voice)
-                st.success("Playing Translated Speech!")
-    else:
-        st.warning("No text extracted. Please upload a valid file.")
+        st.error("❌ Unsupported file type!")
+        policy_text = ""
+
+    # Display extracted text
+    if policy_text:
+        st.subheader("📜 Extracted Text")
+        st.text_area("📝 Text Preview", policy_text[:500], height=200)
+
+        # ------------------- Summarization -------------------
+        summary_english = summarize_text(policy_text)
+        st.subheader("📌 Summary")
+        st.write(summary_english)
+
+        # ------------------- Translation -------------------
+        translation_option = st.radio("🌍 Translate to:", ("No Translation", "Hindi", "Kannada"), index=0)
+
+        if translation_option != "No Translation":
+            target_lang = "hi" if translation_option == "Hindi" else "kn"
+            translated_summary = GoogleTranslator(source="auto", target=target_lang).translate(summary_english)
+            st.subheader(f"📖 Summary in {translation_option}")
+            st.write(translated_summary)
+
+            # ------------------- Convert to Speech -------------------
+            if st.button(f"🎙️ Generate {translation_option} Audio"):
+                tts = gTTS(translated_summary, lang=target_lang)
+                audio_filename = "summary_audio.mp3"
+                tts.save(audio_filename)
+                st.success("✅ Audio Generated Successfully!")
+                st.audio(audio_filename, format="audio/mp3")

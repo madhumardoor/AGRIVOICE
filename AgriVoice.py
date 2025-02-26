@@ -1,89 +1,89 @@
+# -*- coding: utf-8 -*-
+"""
+@author: Madhu M
+"""
+
 import streamlit as st
 import pdfplumber
-import os
-from docx import Document
-from transformers import pipeline
+import nltk
+import re
+import base64
 from deep_translator import GoogleTranslator
 from gtts import gTTS
+from io import BytesIO
+
+# Download necessary NLTK data
+nltk.download("stopwords")
+nltk.download("punkt")
+stop_words = set(nltk.corpus.stopwords.words("english"))
+
+# ------------------- Function to Set Background Image -------------------
+def set_background():
+    page_bg = """
+    <style>
+    .stApp {
+        background: url("https://www.jaagrukbharat.com/_next/image?url=https%3A%2F%2Fjaagruk-public.s3.ap-south-1.amazonaws.com%2Farticle%2Fimages%2Fea1570be-e12d-4d79-bb30-28074d56f917_18KORX2XWfg-oJtHiUzePNur8Kwtiy9Ba.webp&w=3840&q=75");
+        background-size: cover;
+    }
+    </style>
+    """
+    st.markdown(page_bg, unsafe_allow_html=True)
+
+# Call the function to apply background
+set_background()
 
 # ------------------- Streamlit UI -------------------
-st.title("📄 AGRIVOICE: Translate & Summarize Documents")
-st.write("Upload a **PDF** or **DOCX** file to extract text, summarize, translate, and generate speech.")
+st.title("📄 AGRIVOICE: PDF Text Extraction & Translation")
+st.markdown("Upload a **PDF file**, extract text, translate it, and convert it to **Kannada speech** 🎙️.")
 
-uploaded_file = st.file_uploader("📂 Upload File", type=["pdf", "docx"])
+# File uploader
+uploaded_file = st.file_uploader("Upload a PDF", type=["pdf"])
 
-# ------------------- Extract Text from PDF -------------------
-def extract_text_from_pdf(uploaded_file):
-    text = ""
-    try:
+if uploaded_file is not None:
+    
+    # ------------------- Extract text from PDF -------------------
+    def extract_text_from_pdf(uploaded_file):
+        text = ""
         with pdfplumber.open(uploaded_file) as pdf:
             for page in pdf.pages:
                 extracted_text = page.extract_text()
                 if extracted_text:
                     text += extracted_text + "\n\n"
-    except Exception as e:
-        st.error(f"❌ Error reading PDF: {e}")
-    return text
+        return text
 
-# ------------------- Extract Text from DOCX -------------------
-def extract_text_from_docx(uploaded_file):
-    text = ""
-    try:
-        doc = Document(uploaded_file)
-        text = "\n".join([para.text for para in doc.paragraphs])
-    except Exception as e:
-        st.error(f"❌ Error reading DOCX: {e}")
-    return text
-
-# ------------------- Summarization -------------------
-try:
-    summarizer = pipeline("summarization")
-except Exception as e:
-    st.error(f"❌ Error loading summarization model: {e}")
-
-def summarize_text(text):
-    try:
-        return summarizer(text, max_length=150, min_length=50, do_sample=False)[0]["summary_text"]
-    except Exception as e:
-        st.error(f"❌ Error summarizing text: {e}")
-        return ""
-
-# ------------------- Main Logic -------------------
-if uploaded_file:
-    st.success("✅ File Uploaded Successfully!")
-
-    # Extract text based on file type
-    if uploaded_file.type == "application/pdf":
-        policy_text = extract_text_from_pdf(uploaded_file)
-    elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-        policy_text = extract_text_from_docx(uploaded_file)
-    else:
-        st.error("❌ Unsupported file type!")
-        policy_text = ""
+    policy_text = extract_text_from_pdf(uploaded_file)
 
     # Display extracted text
-    if policy_text:
-        st.subheader("📜 Extracted Text")
-        st.text_area("📝 Text Preview", policy_text[:500], height=200)
+    st.subheader("📜 Extracted Text")
+    st.write(policy_text[:500])  # Show first 500 characters
 
-        # ------------------- Summarization -------------------
-        summary_english = summarize_text(policy_text)
-        st.subheader("📌 Summary")
-        st.write(summary_english)
+    # ------------------- Clean extracted text -------------------
+    def clean_text(text):
+        text = re.sub(r"\s+", " ", text)  # Remove extra spaces
+        text = re.sub(r"[^a-zA-Z0-9.,\n\s]", "", text)  # Remove special characters
+        text = text.lower()  # Convert to lowercase
+        text = " ".join([word for word in text.split() if word not in stop_words])  # Remove stopwords
+        return text
 
-        # ------------------- Translation -------------------
-        translation_option = st.radio("🌍 Translate to:", ("No Translation", "Hindi", "Kannada"), index=0)
+    cleaned_policy_text = clean_text(policy_text)
 
-        if translation_option != "No Translation":
-            target_lang = "hi" if translation_option == "Hindi" else "kn"
-            translated_summary = GoogleTranslator(source="auto", target=target_lang).translate(summary_english)
-            st.subheader(f"📖 Summary in {translation_option}")
-            st.write(translated_summary)
+    # ------------------- Translate text -------------------
+    translated_text_hindi = GoogleTranslator(source="auto", target="hi").translate(cleaned_policy_text)
+    translated_text_kannada = GoogleTranslator(source="auto", target="kn").translate(cleaned_policy_text)
 
-            # ------------------- Convert to Speech -------------------
-            if st.button(f"🎙️ Generate {translation_option} Audio"):
-                tts = gTTS(translated_summary, lang=target_lang)
-                audio_filename = "summary_audio.mp3"
-                tts.save(audio_filename)
-                st.success("✅ Audio Generated Successfully!")
-                st.audio(audio_filename, format="audio/mp3")
+    # Display translations
+    st.subheader("🇮🇳 Translated Text (Hindi)")
+    st.write(translated_text_hindi[:500])  # Show first 500 characters
+
+    st.subheader("🇮🇳 Translated Text (Kannada)")
+    st.write(translated_text_kannada[:500])  # Show first 500 characters
+
+    # ------------------- Convert Kannada text to speech -------------------
+    if st.button("🎙️ Generate Kannada Audio"):
+        tts = gTTS(translated_text_kannada, lang="kn")
+        audio_buffer = BytesIO()
+        tts.save(audio_buffer)
+        audio_buffer.seek(0)
+        st.audio(audio_buffer, format="audio/mp3", start_time=0)
+
+st.markdown("🚀 Developed by **Madhu M | AGRIVOICE**")

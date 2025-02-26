@@ -8,3 +8,4 @@ transformers
 torch
 PyPDF2
 googletrans
+Translator

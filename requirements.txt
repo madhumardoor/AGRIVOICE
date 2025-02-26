@@ -8,8 +8,10 @@ pyttsx3  # If text-to-speech is used
 nltk
 deep_translator
 gtts
-python-docx
+streamlit transformers
 transformers
 TensorFlow 2.0 
 PyTorch
-pip install --upgrade pip
+pip 
+python-docx
+huggingface

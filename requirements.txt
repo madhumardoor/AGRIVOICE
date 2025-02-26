@@ -1,18 +1,15 @@
 streamlit
-pymupdf  # For reading PDFs
-pypdf  # Alternative for PDF manipulation
-pdfplumber  # If extracting text from PDFs
-pandas  # If working with tabular data
-speechrecognition  # If voice processing is used
-pyttsx3  # If text-to-speech is used
-nltk
-deep_translator
-gtts
-transformers
-TensorFlow 2.0 
-PyTorch
-python-docx
-torch
-pillow
-requests
-sentencepiece
+pdfplumber  # Extract text from PDFs
+pypdf  # PDF manipulation (alternative to pdfplumber)
+python-docx  # Process DOCX files
+pandas  # Handle tabular data
+nltk  # NLP processing
+deep-translator  # Translate text
+gtts  # Convert text to speech
+transformers  # Hugging Face models
+torch  # PyTorch (ensure it's compatible with your system)
+torchvision  # PyTorch vision library
+torchaudio  # PyTorch audio library
+pillow  # Image processing
+requests  # HTTP requests
+sentencepiece  # Tokenizer for NLP models

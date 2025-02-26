@@ -7,3 +7,4 @@ python-docx
 transformers
 torch
 PyPDF2
+googletrans

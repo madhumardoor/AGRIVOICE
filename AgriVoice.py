@@ -11,37 +11,59 @@ import base64
 from deep_translator import GoogleTranslator
 from gtts import gTTS
 from io import BytesIO
+from docx import Document
 
 # Download necessary NLTK data
 nltk.download("stopwords")
 nltk.download("punkt")
 stop_words = set(nltk.corpus.stopwords.words("english"))
 
-# ------------------- Function to Set Background Image -------------------
+# ------------------- Function to Set Background Color -------------------
 def set_background():
     page_bg = """
     <style>
     .stApp {
-        background: url("https://www.jaagrukbharat.com/_next/image?url=https%3A%2F%2Fjaagruk-public.s3.ap-south-1.amazonaws.com%2Farticle%2Fimages%2Fea1570be-e12d-4d79-bb30-28074d56f917_18KORX2XWfg-oJtHiUzePNur8Kwtiy9Ba.webp&w=3840&q=75");
-        background-size: cover;
+        background-color: #0047AB; /* Dark Blue */
+    }
+    h1, h2, h3, h4, h5, h6, p, .stTextInput, .stButton, .stSelectbox, .stMarkdown {
+        color: white !important;
+    }
+    .stDataFrame {
+        background-color: white !important;
     }
     </style>
     """
     st.markdown(page_bg, unsafe_allow_html=True)
 
-# Call the function to apply background
+# Apply background
 set_background()
 
-# ------------------- Streamlit UI -------------------
-st.title("📄 AGRIVOICE: PDF Text Extraction & Translation")
-st.markdown("Upload a **PDF file**, extract text, translate it, and convert it to **Kannada speech** 🎙️.")
+# ------------------- File Uploader (Appears First) -------------------
+st.markdown("## 📂 UPLOAD A DOCUMENT ")
+uploaded_file = st.file_uploader("", type=["pdf", "docx"])
 
-# File uploader
-uploaded_file = st.file_uploader("Upload a PDF", type=["pdf"])
+if uploaded_file:
+    st.markdown("---")  # Separator line
 
-if uploaded_file is not None:
-    
-    # ------------------- Extract text from PDF -------------------
+    # ------------------- Custom Styled Title -------------------
+    st.markdown(
+        """
+        <style>
+        .title {
+            text-align: center;
+            font-size: 45px;
+            font-weight: bold;
+            color: white;
+        }
+        </style>
+        <p class="title">🌾 AGRIVOICE: Upload, Translate & Listen Instantly! 🌏🔊</p>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown("📄🔊 **Turn Your Documents into Speech – Instantly!**")
+
+    # ------------------- Extract Text from PDF -------------------
     def extract_text_from_pdf(uploaded_file):
         text = ""
         with pdfplumber.open(uploaded_file) as pdf:
@@ -51,13 +73,25 @@ if uploaded_file is not None:
                     text += extracted_text + "\n\n"
         return text
 
-    policy_text = extract_text_from_pdf(uploaded_file)
+    # ------------------- Extract Text from DOCX -------------------
+    def extract_text_from_docx(uploaded_file):
+        doc = Document(uploaded_file)
+        text = "\n".join([para.text for para in doc.paragraphs])
+        return text
+
+    # Check file type and extract text
+    if uploaded_file.type == "application/pdf":
+        policy_text = extract_text_from_pdf(uploaded_file)
+    elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        policy_text = extract_text_from_docx(uploaded_file)
+    else:
+        policy_text = ""
 
     # Display extracted text
     st.subheader("📜 Extracted Text")
     st.write(policy_text[:500])  # Show first 500 characters
 
-    # ------------------- Clean extracted text -------------------
+    # ------------------- Clean Extracted Text -------------------
     def clean_text(text):
         text = re.sub(r"\s+", " ", text)  # Remove extra spaces
         text = re.sub(r"[^a-zA-Z0-9.,\n\s]", "", text)  # Remove special characters
@@ -67,7 +101,7 @@ if uploaded_file is not None:
 
     cleaned_policy_text = clean_text(policy_text)
 
-    # ------------------- Translate text -------------------
+    # ------------------- Translate Text -------------------
     translated_text_hindi = GoogleTranslator(source="auto", target="hi").translate(cleaned_policy_text)
     translated_text_kannada = GoogleTranslator(source="auto", target="kn").translate(cleaned_policy_text)
 
@@ -78,7 +112,7 @@ if uploaded_file is not None:
     st.subheader("🇮🇳 Translated Text (Kannada)")
     st.write(translated_text_kannada[:500])  # Show first 500 characters
 
-    # ------------------- Convert Kannada text to speech -------------------
+    # ------------------- Convert Kannada Text to Speech -------------------
     if st.button("🎙️ Generate Kannada Audio"):
         tts = gTTS(translated_text_kannada, lang="kn")
         audio_buffer = BytesIO()
@@ -86,4 +120,19 @@ if uploaded_file is not None:
         audio_buffer.seek(0)
         st.audio(audio_buffer, format="audio/mp3", start_time=0)
 
-st.markdown("🚀 Developed by **Madhu M | AGRIVOICE**")
+# ------------------- Custom Footer -------------------
+st.markdown("---")
+st.markdown(
+    """
+    <style>
+    .footer {
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+        color: white;
+    }
+    </style>
+    <p class="footer">Developed with ❤️ by <strong>Madhu M</strong> | AGRIVOICE 🌿</p>
+    """,
+    unsafe_allow_html=True
+)

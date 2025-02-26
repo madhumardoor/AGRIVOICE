@@ -7,30 +7,30 @@ import streamlit as st
 import pdfplumber
 import nltk
 import re
-import os
+import io
 from deep_translator import GoogleTranslator
 from gtts import gTTS
 from docx import Document
 from transformers import pipeline
 
-# Download necessary NLTK data
+# Download NLTK data
 nltk.download("stopwords")
 nltk.download("punkt")
 stop_words = set(nltk.corpus.stopwords.words("english"))
 
-# ------------------- Function to Set Background Color -------------------
+# ------------------- Function to Set Background -------------------
 def set_background():
     page_bg = """
     <style>
     .stApp {
         background-color: #004AAD; /* Deep Blue */
-        color: white; /* White Text */
+        color: white;
     }
     h1, h2, h3, h4, h5, h6, p {
         color: white !important;
     }
     .stTextArea textarea, .stTextInput input {
-        background-color: #002F6C; /* Darker Blue */
+        background-color: #002F6C;
         color: white;
         border-radius: 5px;
     }
@@ -50,7 +50,6 @@ def set_background():
     """
     st.markdown(page_bg, unsafe_allow_html=True)
 
-# Apply background
 set_background()
 
 # ------------------- File Uploader -------------------
@@ -60,15 +59,14 @@ uploaded_file = st.file_uploader("", type=["pdf", "docx"])
 if uploaded_file:
     st.markdown("---")  
 
-    # ------------------- Custom Styled Title -------------------
     st.markdown(
         """
         <style>
         .title {
             text-align: center;
-            font-size: 45px;
+            font-size: 35px;
             font-weight: bold;
-            color: black;
+            color: white;
         }
         </style>
         <p class="title">🌾 AGRIVOICE: Upload, Translate & Summarize Instantly! 🌏🔊</p>
@@ -108,15 +106,15 @@ if uploaded_file:
 
     # ------------------- Clean Extracted Text -------------------
     def clean_text(text):
-        text = re.sub(r"\s+", " ", text)  
-        text = re.sub(r"[^a-zA-Z0-9.,\n\s]", "", text)  
-        text = text.lower()  
-        text = " ".join([word for word in text.split() if word not in stop_words])  
+        text = re.sub(r"\s+", " ", text)
+        text = re.sub(r"[^a-zA-Z0-9.,\n\s]", "", text)
+        text = text.lower()
+        text = " ".join([word for word in text.split() if word not in stop_words])
         return text
 
     cleaned_policy_text = clean_text(policy_text)
 
-    # ------------------- Function to Split Large Text for Translation -------------------
+    # ------------------- Function to Split Large Text -------------------
     def split_text(text, max_length=5000):
         chunks = []
         while len(text) > max_length:
@@ -128,7 +126,7 @@ if uploaded_file:
         chunks.append(text)  
         return chunks
 
-    # ------------------- Function to Translate Large Text -------------------
+    # ------------------- Translate Large Text -------------------
     def translate_large_text(text, target_lang):
         text_chunks = split_text(text, 5000)
         translated_chunks = [GoogleTranslator(source="auto", target=target_lang).translate(chunk) for chunk in text_chunks]
@@ -145,10 +143,10 @@ if uploaded_file:
     st.write(translated_text_kannada) 
 
     # ------------------- Generate Summary -------------------
-    summarizer = pipeline("summarization")
+    summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
 
     def summarize_text(text):
-        text_chunks = split_text(text, 1000)  
+        text_chunks = split_text(text, 1000)
         summarized_chunks = [summarizer(chunk, max_length=150, min_length=50, do_sample=False)[0]["summary_text"] for chunk in text_chunks]
         return " ".join(summarized_chunks)  
 
@@ -167,17 +165,17 @@ if uploaded_file:
     st.write(summary_kannada)
 
     # ------------------- Convert Kannada Summary to Speech -------------------
-    if st.button("🎙️ Generate Kannada Summary Audio"):
-        tts = gTTS(summary_kannada, lang="kn")
-        
-        audio_filename = "kannada_summary_audio.mp3"
-        tts.save(audio_filename)
+    def generate_audio(summary_text, lang="kn"):
+        tts = gTTS(summary_text, lang=lang)
+        audio_buffer = io.BytesIO()
+        tts.write_to_fp(audio_buffer)
+        audio_buffer.seek(0)
+        return audio_buffer
 
-        if os.path.exists(audio_filename):
-            st.success("✅ Kannada Summary Audio Generated Successfully! 🎧")
-            st.audio(audio_filename, format="audio/mp3")
-        else:
-            st.error("❌ Audio generation failed. Please try again.")
+    if st.button("🎙️ Generate Kannada Summary Audio"):
+        audio_data = generate_audio(summary_kannada)
+        st.success("✅ Kannada Summary Audio Generated Successfully! 🎧")
+        st.audio(audio_data, format="audio/mp3")
 
 # ------------------- Custom Footer -------------------
 st.markdown("---")

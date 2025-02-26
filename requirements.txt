@@ -8,10 +8,11 @@ pyttsx3  # If text-to-speech is used
 nltk
 deep_translator
 gtts
-streamlit transformers
 transformers
 TensorFlow 2.0 
 PyTorch
-pip 
 python-docx
-huggingface
+torch
+pillow
+requests
+sentencepiece

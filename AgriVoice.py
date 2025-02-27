@@ -47,14 +47,15 @@ def text_to_speech(text, lang):
 
 def ask_ai(question):
     """Get AI-generated answers to farmers' questions."""
-    response = openai.ChatCompletion.create(
+    client = openai.OpenAI(api_key="YOUR_OPENAI_API_KEY")
+    response = client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "user", "content": question}]
     )
-    return response["choices"][0]["message"]["content"].strip()
+    return response.choices[0].message.content.strip()
 
 # Streamlit UI
-st.title("🌾 Farmer's AI Assistant")
+st.title("\U0001F33E Farmer's AI Assistant")
 st.write("Ask questions, translate agricultural content, and listen to responses!")
 
 # File upload
@@ -77,7 +78,7 @@ if uploaded_file:
     st.text_area("", translated_text, height=200)
     
     # Text to Speech
-    if st.button("🎤 Listen to Translation"):
+    if st.button("\U0001F3A4 Listen to Translation"):
         audio_file = text_to_speech(translated_text, lang)
         st.audio(audio_file, format="audio/mp3")
 
@@ -87,6 +88,6 @@ question = st.text_input("Enter your question")
 if st.button("Get Answer"):
     if question:
         answer = ask_ai(question)
-        st.write("🤖 AI Answer:", answer)
+        st.write("\U0001F916 AI Answer:", answer)
     else:
         st.warning("Please enter a question!")

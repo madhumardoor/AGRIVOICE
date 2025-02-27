@@ -37,7 +37,7 @@ def translate_text(text, lang):
     """Translate text to the selected language."""
     translator = Translator()
     translated = translator.translate(text, dest=lang)
-    return translated.__dict__.get("text", "Translation failed.")
+    return translated.text if translated else "Translation failed."
 
 def text_to_speech(text, lang):
     """Convert text to speech."""

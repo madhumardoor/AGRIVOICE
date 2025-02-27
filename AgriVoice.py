@@ -181,4 +181,4 @@ st.markdown(
     <p class="footer">Developed with ❤️ by <strong>Madhu M</strong> | AGRIVOICE 🌿</p>
     """,
     unsafe_allow_html=True
-)
+) 

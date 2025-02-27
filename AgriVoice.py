@@ -12,6 +12,11 @@ from deep_translator import GoogleTranslator
 from gtts import gTTS
 from docx import Document
 from transformers import pipeline
+import asyncio
+try:
+    asyncio.get_running_loop()
+except RuntimeError:
+    asyncio.run(asyncio.sleep(0))  # Ensures an event loop is created
 
 # Download necessary NLTK data
 nltk.download("stopwords")

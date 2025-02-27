@@ -11,3 +11,4 @@ googletrans
 Translator
 pyttsx3
 asyncio
+openai

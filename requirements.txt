@@ -10,3 +10,4 @@ PyPDF2
 googletrans
 Translator
 pyttsx3
+asyncio

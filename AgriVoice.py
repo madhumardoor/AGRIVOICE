@@ -13,8 +13,8 @@ import os
 nltk.download("stopwords")
 stop_words = set(stopwords.words("english"))
 
-# Set OpenAI API key
-openai.api_key = "YOUR_OPENAI_API_KEY"
+# Set OpenAI API key securely
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def extract_text_from_pdf(file):
     """Extract text from PDF."""

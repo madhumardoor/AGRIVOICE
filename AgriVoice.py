@@ -2,6 +2,7 @@ import streamlit as st
 import pdfplumber
 import re
 import nltk
+import asyncio
 from nltk.corpus import stopwords
 from googletrans import Translator
 from gtts import gTTS
@@ -36,7 +37,9 @@ def clean_text(text):
 def translate_text(text, lang):
     """Translate text to the selected language."""
     translator = Translator()
-    translated = translator.translate(text, dest=lang)
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    translated = loop.run_until_complete(translator.translate(text, dest=lang))
     return translated.text if translated else "Translation failed."
 
 def text_to_speech(text, lang):

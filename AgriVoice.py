@@ -37,7 +37,7 @@ def translate_text(text, lang):
     """Translate text to the selected language."""
     translator = Translator()
     translated = translator.translate(text, dest=lang)
-    return translated.text
+    return translated.__dict__.get("text", "Translation failed.")
 
 def text_to_speech(text, lang):
     """Convert text to speech."""
@@ -47,7 +47,7 @@ def text_to_speech(text, lang):
 
 def ask_ai(question):
     """Get AI-generated answers to farmers' questions."""
-    client = openai.OpenAI(api_key="YOUR_OPENAI_API_KEY")
+    client = openai.OpenAI()
     response = client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "user", "content": question}]

@@ -16,12 +16,8 @@ except LookupError:
     nltk.download("stopwords")
     stop_words = set(stopwords.words("english"))
 
-# ✅ Load Google Gemini API key securely
-api_key = os.getenv("GEMINI_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
-else:
-    st.error("🔑 API Key missing! Please set GEMINI_API_KEY in your environment.")
+# Load Google Gemini API key from environment variable
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 def extract_text_from_pdf(file):
     """Extract text from a PDF file."""

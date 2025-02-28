@@ -14,7 +14,7 @@ nltk.download("stopwords")
 stop_words = set(stopwords.words("english"))
 
 # Set OpenAI API key securely
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def extract_text_from_pdf(file):
     """Extract text from PDF."""
@@ -49,13 +49,12 @@ def text_to_speech(text, lang):
     return "output.mp3"
 
 def ask_ai(question):
-    """Get AI-generated answers to farmers' questions."""
-    client = openai.OpenAI()
-response = client.chat.completions.create(
-    model="gpt-4",
-    messages=[{"role": "user", "content": question}]
-)
-return response.choices[0].message.content.strip()
+    """Get AI-generated answers to farmers' questions using OpenAI's latest API."""
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": question}]
+    )
+    return response.choices[0].message.content.strip()
 
 # Streamlit UI
 st.title("\U0001F33E Farmer's AI Assistant")

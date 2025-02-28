@@ -48,14 +48,16 @@ def text_to_speech(text, lang):
     tts.save("output.mp3")
     return "output.mp3"
 
-def ask_ai(question):
-    """Get AI-generated answers to farmers' questions using Google Gemini API."""
+def ask_ai(question, document_text):
+    """Get AI-generated answers to farmers' questions using Google Gemini API with document context."""
     try:
         model = genai.GenerativeModel("gemini-pro")
-        response = model.generate_content(question)
+        prompt = f"Based on the following document:\n{document_text}\n\nAnswer this question:\n{question}"
+        response = model.generate_content(prompt)
         return response.text.strip() if response else "No response from AI."
     except Exception as e:
         return f"Error: {str(e)}"
+
 
 # Streamlit UI
 st.title("🌾 Farmer's AI Assistant")
@@ -85,12 +87,12 @@ if uploaded_file:
         audio_file = text_to_speech(translated_text, lang)
         st.audio(audio_file, format="audio/mp3")
 
-# AI Question-Answering
-st.subheader("Ask a Farming Question")
-question = st.text_input("Enter your question")
-if st.button("Get Answer"):
-    if question:
-        answer = ask_ai(question)
-        st.write("🤖 AI Answer:", answer)
-    else:
-        st.warning("Please enter a question!")
+    # AI Question-Answering Section (✅ PLACE YOUR CODE HERE)
+    st.subheader("Ask a Farming Question")
+    question = st.text_input("Enter your question")
+    if st.button("Get Answer"):
+        if question:
+            answer = ask_ai(question, extracted_text)  # Use document text for better responses
+            st.write("🤖 AI Answer:", answer)
+        else:
+            st.warning("Please enter a question!")

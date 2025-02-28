@@ -12,3 +12,4 @@ Translator
 pyttsx3
 asyncio
 openai
+google-generativeai

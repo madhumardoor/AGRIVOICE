@@ -39,12 +39,10 @@ def clean_text(text):
 
 def translate_text(text, lang):
     """Translate text to the selected language."""
-    try:
-        translator = Translator()
-        translated = translator.translate(text, dest=lang)
-        return translated.text if translated else "Translation failed."
-    except Exception as e:
-        return f"Translation Error: {str(e)}"
+    translator = Translator()
+    translated = translator.translate(text, dest=lang)
+    return translated.text if translated else "Translation failed."
+
 
 def text_to_speech(text, lang):
     """Convert text to speech and return the audio file."""

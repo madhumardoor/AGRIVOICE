@@ -14,7 +14,7 @@ nltk.download("stopwords")
 stop_words = set(stopwords.words("english"))
 
 # Load OpenAI API key safely
-api_key = st.secrets.get("YOUR_GEMINI_API_KEY", None)
+genai.configure(api_key=os.getenv("YOUR_GEMINI_API_KEY", None)
 if not api_key:
     st.error("❌ OpenAI API Key is missing! Please add it to Streamlit Secrets.")
 else:

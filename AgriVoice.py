@@ -3,18 +3,22 @@ import pdfplumber
 import re
 import nltk
 import asyncio
-import google.generativeai as genai
 from nltk.corpus import stopwords
 from googletrans import Translator
 from gtts import gTTS
+import google.generativeai as genai
 import os
 
-# Download stopwords
-nltk.download("stopwords")
-stop_words = set(stopwords.words("english"))
+# ✅ Fix: Ensure stopwords are only downloaded if missing
+nltk.data.path.append("/home/appuser/nltk_data")
+try:
+    stop_words = set(stopwords.words("english"))
+except LookupError:
+    nltk.download("stopwords")
+    stop_words = set(stopwords.words("english"))
 
-# Load Google Gemini API key from environment variable
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+# ✅ Set up Google Gemini API key (replace with your actual key)
+genai.configure(api_key=st.secrets["YOUR_GEMINI_API_KEY"])
 
 def extract_text_from_pdf(file):
     """Extract text from PDF."""
@@ -49,43 +53,46 @@ def text_to_speech(text, lang):
     return "output.mp3"
 
 def ask_ai(question):
-    """Get AI-generated answers to farmers' questions using Google Gemini API."""
+    """Get AI-generated answers using Google Gemini API."""
     try:
-        model = genai.GenerativeModel("gemini-pro")
+        model = genai.GenerativeModel("gemini-pro")  # Using Gemini AI model
         response = model.generate_content(question)
-        return response.text.strip() if response else "No response from AI."
+        return response.text.strip() if response.text else "No response."
     except Exception as e:
         return f"Error: {str(e)}"
 
-# Streamlit UI
+# ✅ Streamlit UI
 st.title("🌾 Farmer's AI Assistant")
 st.write("Ask questions, translate agricultural content, and listen to responses!")
 
-# File upload
+# ✅ File upload
 uploaded_file = st.file_uploader("Upload an Agricultural PDF", type=["pdf"])
 if uploaded_file:
     extracted_text = extract_text_from_pdf(uploaded_file)
     cleaned_text = clean_text(extracted_text)
     
     st.subheader("Extracted Text")
-    st.text_area("", extracted_text, height=200)
+    st.text_area("Extracted Text", extracted_text, height=200, label_visibility="collapsed")
     
     st.subheader("Cleaned Text")
-    st.text_area("", cleaned_text, height=200)
+    st.text_area("Cleaned Text", cleaned_text, height=200, label_visibility="collapsed")
     
-    # Language selection
-    lang = st.selectbox("Select Language", ["kn", "hi", "ta", "te", "mr", "bn"], format_func=lambda x: {"kn": "Kannada", "hi": "Hindi", "ta": "Tamil", "te": "Telugu", "mr": "Marathi", "bn": "Bengali"}[x])
+    # ✅ Language selection
+    lang = st.selectbox("Select Language", ["kn", "hi", "ta", "te", "mr", "bn"], 
+                        format_func=lambda x: {"kn": "Kannada", "hi": "Hindi", "ta": "Tamil", 
+                                               "te": "Telugu", "mr": "Marathi", "bn": "Bengali"}[x])
+    
     translated_text = translate_text(cleaned_text, lang)
     
     st.subheader("Translated Text")
-    st.text_area("", translated_text, height=200)
+    st.text_area("Translated Text", translated_text, height=200, label_visibility="collapsed")
     
-    # Text to Speech
+    # ✅ Text to Speech
     if st.button("🎤 Listen to Translation"):
         audio_file = text_to_speech(translated_text, lang)
         st.audio(audio_file, format="audio/mp3")
 
-# AI Question-Answering
+# ✅ AI Question-Answering
 st.subheader("Ask a Farming Question")
 question = st.text_input("Enter your question")
 if st.button("Get Answer"):

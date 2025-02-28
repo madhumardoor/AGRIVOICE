@@ -1,98 +1,63 @@
 import streamlit as st
 import pdfplumber
-import re
-import nltk
-import asyncio
-import google.generativeai as genai
-from nltk.corpus import stopwords
-from googletrans import Translator
+from docx import Document
+from deep_translator import GoogleTranslator
 from gtts import gTTS
-import os
+from transformers import pipeline
 
-# Download stopwords
-nltk.download("stopwords")
-stop_words = set(stopwords.words("english"))
+# ------------------- File Uploader -------------------
+st.title("📂 AGRIVOICE: Translate & Summarize Instantly!")
+uploaded_file = st.file_uploader("", type=["pdf", "docx"])
 
-# Load Google Gemini API key from environment variable
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-def extract_text_from_pdf(file):
-    """Extract text from PDF."""
-    text = ""
-    with pdfplumber.open(file) as pdf:
-        for page in pdf.pages:
-            extracted_text = page.extract_text()
-            if extracted_text:
-                text += extracted_text + "\n\n"
-    return text
-
-def clean_text(text):
-    """Clean extracted text."""
-    text = re.sub(r"\s+", " ", text)
-    text = re.sub(r"[^a-zA-Z0-9.,\n\s]", "", text)
-    text = text.lower()
-    text = " ".join([word for word in text.split() if word not in stop_words])
-    return text
-
-def translate_text(text, lang):
-    """Translate text to the selected language."""
-    translator = Translator()
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    translated = loop.run_until_complete(translator.translate(text, dest=lang))
-    return translated.text if translated else "Translation failed."
-
-def text_to_speech(text, lang):
-    """Convert text to speech."""
-    tts = gTTS(text=text, lang=lang)
-    tts.save("output.mp3")
-    return "output.mp3"
-
-def ask_ai(question, document_text):
-    """Get AI-generated answers to farmers' questions using Google Gemini API with document context."""
-    try:
-        model = genai.GenerativeModel("gemini-pro")
-        prompt = f"Based on the following document:\n{document_text}\n\nAnswer this question:\n{question}"
-        response = model.generate_content(prompt)
-        return response.text.strip() if response else "No response from AI."
-    except Exception as e:
-        return f"Error: {str(e)}"
-
-
-# Streamlit UI
-st.title("🌾 Farmer's AI Assistant")
-st.write("Ask questions, translate agricultural content, and listen to responses!")
-
-# File upload
-uploaded_file = st.file_uploader("Upload an Agricultural PDF", type=["pdf"])
 if uploaded_file:
-    extracted_text = extract_text_from_pdf(uploaded_file)
-    cleaned_text = clean_text(extracted_text)
-    
-    st.subheader("Extracted Text")
-    st.text_area("", extracted_text, height=200)
-    
-    st.subheader("Cleaned Text")
-    st.text_area("", cleaned_text, height=200)
-    
-    # Language selection
-    lang = st.selectbox("Select Language", ["kn", "hi", "ta", "te", "mr", "bn"], format_func=lambda x: {"kn": "Kannada", "hi": "Hindi", "ta": "Tamil", "te": "Telugu", "mr": "Marathi", "bn": "Bengali"}[x])
-    translated_text = translate_text(cleaned_text, lang)
-    
-    st.subheader("Translated Text")
-    st.text_area("", translated_text, height=200)
-    
-    # Text to Speech
-    if st.button("🎤 Listen to Translation"):
-        audio_file = text_to_speech(translated_text, lang)
-        st.audio(audio_file, format="audio/mp3")
+    # Extract text from uploaded document
+    def extract_text(file):
+        if file.type == "application/pdf":
+            with pdfplumber.open(file) as pdf:
+                return "\n".join(page.extract_text() for page in pdf.pages if page.extract_text())
+        elif file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            return "\n".join(para.text for para in Document(file).paragraphs)
+        return ""
 
-    # AI Question-Answering Section (✅ PLACE YOUR CODE HERE)
-    st.subheader("Ask a Farming Question")
-    question = st.text_input("Enter your question")
-    if st.button("Get Answer"):
-        if question:
-            answer = ask_ai(question, extracted_text)  # Use document text for better responses
-            st.write("🤖 AI Answer:", answer)
-        else:
-            st.warning("Please enter a question!")
+    policy_text = extract_text(uploaded_file)
+
+    # Display extracted text
+    st.subheader("📜 Extracted Text")
+    st.write(policy_text[:2000] + "...")  # Show only the first 2000 characters for readability
+
+    # ------------------- Translate Text -------------------
+    def translate_text(text, lang):
+        return GoogleTranslator(source="auto", target=lang).translate(text[:5000])  # Translate only first 5000 chars
+
+    hindi_translation = translate_text(policy_text, "hi")
+    kannada_translation = translate_text(policy_text, "kn")
+
+    st.subheader("🇮🇳 Hindi Translation")
+    st.write(hindi_translation)
+    
+    st.subheader("🇮🇳 Kannada Translation")
+    st.write(kannada_translation)
+
+    # ------------------- Generate Summary -------------------
+    summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+
+    def summarize_text(text):
+        return summarizer(text[:1000], max_length=150, min_length=50, do_sample=False)[0]["summary_text"]
+
+    english_summary = summarize_text(policy_text)
+
+    # Translate summary
+    hindi_summary = translate_text(english_summary, "hi")
+    kannada_summary = translate_text(english_summary, "kn")
+
+    st.subheader("📌 Hindi Summary")
+    st.write(hindi_summary)
+
+    st.subheader("📌 Kannada Summary")
+    st.write(kannada_summary)
+
+    # ------------------- Convert Kannada Summary to Speech -------------------
+    if st.button("🎙️ Generate Kannada Audio"):
+        tts = gTTS(kannada_summary, lang="kn")
+        tts.save("kannada_summary.mp3")
+        st.audio("kannada_summary.mp3", format="audio/mp3")

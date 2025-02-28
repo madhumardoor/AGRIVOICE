@@ -3,22 +3,18 @@ import pdfplumber
 import re
 import nltk
 import asyncio
+import google.generativeai as genai
 from nltk.corpus import stopwords
 from googletrans import Translator
 from gtts import gTTS
-import openai
 import os
 
 # Download stopwords
 nltk.download("stopwords")
 stop_words = set(stopwords.words("english"))
 
-# Load OpenAI API key safely
-genai.configure(api_key=os.getenv("YOUR_GEMINI_API_KEY", None))
-if not api_key:
-    st.error("❌ OpenAI API Key is missing! Please add it to Streamlit Secrets.")
-else:
-    client = openai.OpenAI(api_key=api_key)
+# Load Google Gemini API key from environment variable
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 def extract_text_from_pdf(file):
     """Extract text from PDF."""
@@ -53,16 +49,12 @@ def text_to_speech(text, lang):
     return "output.mp3"
 
 def ask_ai(question):
-    """Get AI-generated answers to farmers' questions using OpenAI's API."""
-    if not api_key:
-        return "❌ API Key is missing. Cannot connect to OpenAI."
+    """Get AI-generated answers to farmers' questions using Google Gemini API."""
     try:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",  # Using gpt-3.5-turbo instead of gpt-4
-            messages=[{"role": "user", "content": question}]
-        )
-        return response.choices[0].message.content.strip()
-    except openai.OpenAIError as e:
+        model = genai.GenerativeModel("gemini-pro")
+        response = model.generate_content(question)
+        return response.text.strip() if response else "No response from AI."
+    except Exception as e:
         return f"Error: {str(e)}"
 
 # Streamlit UI
@@ -82,9 +74,7 @@ if uploaded_file:
     st.text_area("", cleaned_text, height=200)
     
     # Language selection
-    lang = st.selectbox("Select Language", ["kn", "hi", "ta", "te", "mr", "bn"], 
-                        format_func=lambda x: {"kn": "Kannada", "hi": "Hindi", "ta": "Tamil", 
-                                               "te": "Telugu", "mr": "Marathi", "bn": "Bengali"}[x])
+    lang = st.selectbox("Select Language", ["kn", "hi", "ta", "te", "mr", "bn"], format_func=lambda x: {"kn": "Kannada", "hi": "Hindi", "ta": "Tamil", "te": "Telugu", "mr": "Marathi", "bn": "Bengali"}[x])
     translated_text = translate_text(cleaned_text, lang)
     
     st.subheader("Translated Text")

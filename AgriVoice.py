@@ -50,12 +50,11 @@ def text_to_speech(text, lang):
 
 def ask_ai(question):
     """Get AI-generated answers to farmers' questions."""
-    client = openai.OpenAI()
-    response = client.chat.completions.create(
+    response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[{"role": "user", "content": question}]
     )
-    return response.choices[0].message.content.strip()
+    return response["choices"][0]["message"]["content"].strip()
 
 # Streamlit UI
 st.title("\U0001F33E Farmer's AI Assistant")

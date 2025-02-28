@@ -2,6 +2,7 @@ import streamlit as st
 import pdfplumber
 import re
 import nltk
+import asyncio
 from nltk.corpus import stopwords
 from googletrans import Translator
 from gtts import gTTS
@@ -13,22 +14,16 @@ nltk.download("stopwords")
 stop_words = set(stopwords.words("english"))
 
 # Set OpenAI API key securely
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    st.error("⚠️ OpenAI API key is missing. Please set it as an environment variable.")
-openai.api_key = api_key
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def extract_text_from_pdf(file):
-    """Extract text from a PDF file."""
+    """Extract text from PDF."""
     text = ""
-    try:
-        with pdfplumber.open(file) as pdf:
-            for page in pdf.pages:
-                extracted_text = page.extract_text()
-                if extracted_text:
-                    text += extracted_text + "\n\n"
-    except Exception as e:
-        st.error(f"Error extracting text: {e}")
+    with pdfplumber.open(file) as pdf:
+        for page in pdf.pages:
+            extracted_text = page.extract_text()
+            if extracted_text:
+                text += extracted_text + "\n\n"
     return text
 
 def clean_text(text):
@@ -42,38 +37,27 @@ def clean_text(text):
 def translate_text(text, lang):
     """Translate text to the selected language."""
     translator = Translator()
-    try:
-        translated = translator.translate(text, dest=lang)
-        return translated.text
-    except Exception as e:
-        st.error(f"Translation error: {e}")
-        return "Translation failed."
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    translated = loop.run_until_complete(translator.translate(text, dest=lang))
+    return translated.text if translated else "Translation failed."
 
 def text_to_speech(text, lang):
     """Convert text to speech."""
-    try:
-        tts = gTTS(text=text, lang=lang)
-        audio_path = "output.mp3"
-        tts.save(audio_path)
-        return audio_path
-    except Exception as e:
-        st.error(f"Text-to-speech error: {e}")
-        return None
+    tts = gTTS(text=text, lang=lang)
+    tts.save("output.mp3")
+    return "output.mp3"
 
 def ask_ai(question):
-    """Get AI-generated answers to farmers' questions using OpenAI."""
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[{"role": "user", "content": question}]
-        )
-        return response["choices"][0]["message"]["content"].strip()
-    except Exception as e:
-        st.error(f"AI API Error: {e}")
-        return "AI is currently unavailable."
+    """Get AI-generated answers to farmers' questions using OpenAI's latest API."""
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": question}]
+    )
+    return response.choices[0].message.content.strip()
 
 # Streamlit UI
-st.title("🌾 Farmer's AI Assistant")
+st.title("\U0001F33E Farmer's AI Assistant")
 st.write("Ask questions, translate agricultural content, and listen to responses!")
 
 # File upload
@@ -89,18 +73,16 @@ if uploaded_file:
     st.text_area("", cleaned_text, height=200)
     
     # Language selection
-    lang = st.selectbox("Select Language", ["kn", "hi", "ta", "te", "mr", "bn"], 
-                        format_func=lambda x: {"kn": "Kannada", "hi": "Hindi", "ta": "Tamil", "te": "Telugu", "mr": "Marathi", "bn": "Bengali"}[x])
+    lang = st.selectbox("Select Language", ["kn", "hi", "ta", "te", "mr", "bn"], format_func=lambda x: {"kn": "Kannada", "hi": "Hindi", "ta": "Tamil", "te": "Telugu", "mr": "Marathi", "bn": "Bengali"}[x])
     translated_text = translate_text(cleaned_text, lang)
     
     st.subheader("Translated Text")
     st.text_area("", translated_text, height=200)
     
     # Text to Speech
-    if st.button("🎤 Listen to Translation"):
+    if st.button("\U0001F3A4 Listen to Translation"):
         audio_file = text_to_speech(translated_text, lang)
-        if audio_file:
-            st.audio(audio_file, format="audio/mp3")
+        st.audio(audio_file, format="audio/mp3")
 
 # AI Question-Answering
 st.subheader("Ask a Farming Question")
@@ -108,6 +90,6 @@ question = st.text_input("Enter your question")
 if st.button("Get Answer"):
     if question:
         answer = ask_ai(question)
-        st.write("🤖 AI Answer:", answer)
+        st.write("\U0001F916 AI Answer:", answer)
     else:
         st.warning("Please enter a question!")

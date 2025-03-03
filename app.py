@@ -7,11 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/1PUTUD9PVElbly0LTiV5hQ1z6LdHzp50p
 """
 
-!pip install streamlit
-!pip install openai
-!pip install faiss-cpu
-!pip install sentence-transformers
-
 import streamlit as st
 import faiss
 import numpy as np

@@ -85,16 +85,4 @@ if uploaded_file:
         audio_file = text_to_speech(translated_text, lang)
         st.audio(audio_file, format="audio/mp3")
 
-# AI Question-Answering Section
-st.subheader("Ask a Farming Question")
-question = st.text_input("Enter your question")
-if st.button("Get Answer"):
-    if uploaded_file and extracted_text:  # Ensure document is uploaded
-        if question:
-            answer = ask_ai(question, extracted_text)  # Use extracted text for better responses
-            st.write("🤖 AI Answer:", answer)
-        else:
-            st.warning("Please enter a question!")
-    else:
-        st.warning("Please upload a PDF first!")
 

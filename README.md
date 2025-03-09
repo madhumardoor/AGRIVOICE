@@ -24,12 +24,12 @@ Check out the live demo here:
 🔗 [Streamlit App 1](https://agrivoice-chatbot-pdfreader.streamlit.app/) 
 
 ## 🎯 How It Works
-1️⃣ Upload an agricultural PDF 📄
+1️⃣ Upload an agricultural PDF 
 2️⃣ The AI extracts and cleans text
-3️⃣ Select a language for translation 🌐
-4️⃣ Ask a farming-related question 🧑‍🌾
+3️⃣ Select a language for translation 
+4️⃣ Ask a farming-related question 
 5️⃣ The AI provides contextual answers
-6️⃣ Convert text to speech output 🔊
+6️⃣ Convert text to speech output 
 
 ## 🛠️ Future Enhancements
 🌾 Expand to more languages
@@ -38,12 +38,12 @@ Check out the live demo here:
 
 ## 🤝 Contributing
 We welcome contributions! Feel free to:
-Submit bug reports 🐞
-Suggest improvements 🌟
-Create pull requests 🔥
+Submit bug reports,
+Suggest improvements,
+Create pull requests.
 
 ## 📄 License
 This project is open-source under the MIT License.
 
 ## ✨ Credits
-Developed by Madhu M 🚀
+Developed by Madhu M 

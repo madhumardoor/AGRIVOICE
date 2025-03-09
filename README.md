@@ -1,29 +1,20 @@
+# 🌱 AGRIVOICE – AI-Powered Agricultural Chatbot
 
-# 🌾 Farmer Assistance System: Document Summarization & Speech Conversion  
+## 📌 Project Overview
+AGRIVOICE integrates a vector database with the ChatGPT API to provide efficient retrieval and processing of agricultural information. This project helps farmers and agricultural researchers get quick, AI-powered answers to their farming-related queries.
 
-This project helps farmers easily understand government schemes, loan subsidies, and benefits by **summarizing policy documents** and **converting them into speech** for accessibility. The tool extracts key information from official PDFs and provides an easy-to-understand summary, which can then be played as audio.  
+## 🚀 Features
+✅ PDF Text Extraction: Upload agricultural PDFs, and the system extracts useful text.
+✅ Multilingual Translation: Supports translation into Kannada, Hindi, Tamil, Telugu, Marathi, and Bengali using the Gemini API.
+✅ AI-Powered Q&A: Uses FAISS Vector Search and ChatGPT to answer farming-related questions.
+✅ Text-to-Speech: Converts translated text into speech for better accessibility.
+✅ Efficient Search with FAISS: Finds relevant farming insights using vector-based search.
 
----
-
-## 🚀 Features  
-✅ **Extracts and summarizes** text from PDF policy documents  
-✅ **Converts summarized text into speech** for easy accessibility  
-✅ **Supports multiple languages** for diverse farmer communities  
-✅ **Handles scanned PDFs** using OCR technology  
-✅ **User-friendly and automated**  
-
----
----
-
-
-## Ensure you have the following installed:
-
-✅Python 3.x
-✅pdfplumber (for extracting text from standard PDFs)
-✅transformers (for text summarization using AI)
-✅pyttsx3 (for text-to-speech conversion)
-✅pytesseract & pdf2image (for OCR-based PDF extraction)
-
-## Contributing
-✅Feel free to contribute!
-Open a pull request if you have improvements.
+## 📌 Tech Stack
+Python 🐍
+Streamlit (for UI)
+FAISS (for vector search)
+Google Gemini API (for translation & AI processing)
+Sentence Transformers (for embeddings)
+gTTS (for text-to-speech)
+PDFPlumber (for PDF text extraction)

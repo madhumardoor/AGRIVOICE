@@ -11,13 +11,13 @@ AGRIVOICE integrates a vector database with the ChatGPT API to provide efficient
 ✅ Efficient Search with FAISS: Finds relevant farming insights using vector-based search.
 
 ## 📌 Tech Stack
-Python 🐍
-Streamlit (for UI)
-FAISS (for vector search)
-Google Gemini API (for translation & AI processing)
-Sentence Transformers (for embeddings)
-gTTS (for text-to-speech)
-PDFPlumber (for PDF text extraction)
+Python ,
+Streamlit (for UI),
+FAISS (for vector search),
+Google Gemini API (for translation & AI processing),
+Sentence Transformers (for embeddings),
+gTTS (for text-to-speech),
+PDFPlumber (for PDF text extraction).
 
 ## 📺 Demo
 Check out the live demo here:

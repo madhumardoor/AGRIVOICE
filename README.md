@@ -21,7 +21,7 @@ PDFPlumber (for PDF text extraction)
 
 ## 📺 Demo
 Check out the live demo here:
-🔗 [Streamlit App 1]([https://agrivoice-vuzyb5vfrfkyskbzx9qexn.streamlit.app/](https://agrivoice-chatbot-pdfreader.streamlit.app/))  
+🔗 [Streamlit App 1](https://agrivoice-chatbot-pdfreader.streamlit.app/) 
 
 ## 🎯 How It Works
 1️⃣ Upload an agricultural PDF 📄

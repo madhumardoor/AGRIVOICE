@@ -19,12 +19,12 @@ Sentence Transformers (for embeddings)
 gTTS (for text-to-speech)
 PDFPlumber (for PDF text extraction)
 
-##📺 Demo
+## 📺 Demo
 Check out the live demo here:
 🔗 Streamlit App 1
 🔗 Streamlit App 2
 
-##🎯 How It Works
+## 🎯 How It Works
 1️⃣ Upload an agricultural PDF 📄
 2️⃣ The AI extracts and cleans text
 3️⃣ Select a language for translation 🌐
@@ -32,7 +32,7 @@ Check out the live demo here:
 5️⃣ The AI provides contextual answers
 6️⃣ Convert text to speech output 🔊
 
-##🛠️ Future Enhancements
+## 🛠️ Future Enhancements
 🌾 Expand to more languages
 🧠 Integrate more AI models for better farming insights
 📱 Mobile-friendly version
@@ -43,8 +43,8 @@ Submit bug reports 🐞
 Suggest improvements 🌟
 Create pull requests 🔥
 
-##📄 License
+## 📄 License
 This project is open-source under the MIT License.
 
-##✨ Credits
+## ✨ Credits
 Developed by Madhu M 🚀
